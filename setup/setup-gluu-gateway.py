@@ -713,104 +713,6 @@ make sure it's available from this server."""
     def detect_initd(self):
         self.os_initdaemon = open(os.path.join('/proc/1/status'), 'r').read().split()[1]
 
-    def configure_metrics(self):
-        self.log_it('Configuring metrics plugin...')
-        print 'Configuring metrics plugin...'
-
-        # Configuring service
-        self.log_it('Fetching service...')
-        service_response_json = self.http_get_call(endpoint='http://localhost:%s/services/gluu-org-metrics-service' % self.kong_admin_listen_port)
-        self.log_it('service_response_json : %s' % service_response_json)
-
-        if 'id' not in service_response_json:
-            self.log_it('Configuring service...')
-            service_endpoint = 'http://localhost:%s/services' % self.kong_admin_listen_port
-            payload = {
-                'name': "gluu-org-metrics-service",
-                'url': 'http://localhost:%s' % self.kong_admin_listen_port,
-            }
-            service_response_json = self.http_post_call(service_endpoint, payload)
-            self.log_it('service_response_json : %s' % service_response_json)
-
-        # Configuring Route
-        self.log_it('Fetching route...')
-        route_response_json = self.http_get_call(endpoint='http://localhost:%s/services/gluu-org-metrics-service/routes' % self.kong_admin_listen_port)
-        self.log_it('route_response_json : %s' % route_response_json)
-
-        route_id = route_response_json['data'] and route_response_json['data'][0] and route_response_json['data'][0]['id']
-
-        if not route_id:
-            self.log_it('Configuring Route...')
-            route_endpoint = 'http://localhost:%s/routes' % self.kong_admin_listen_port
-            payload = {
-                "methods": [
-                    "GET"
-                ],
-                "paths": [
-                    "/gluu-metrics"
-                ],
-                "strip_path": False,
-                "service": {
-                    "id": service_response_json['id']
-                }
-            }
-            self.http_post_call(route_endpoint, payload)
-
-        # Configuring ip-restriction plugin globally
-        self.log_it('Fetching plugins...')
-        plugins_response_json = self.http_get_call(endpoint='http://localhost:%s/plugins/' % self.kong_admin_listen_port)
-        self.log_it('plugins_response_json : %s' % plugins_response_json)
-        self.log_it('data length : %s' % len(plugins_response_json['data']))
-        check_ip_plugin_exist = False
-        check_metrics_plugin_exist = False
-
-        if len(plugins_response_json['data']) > 1:
-            for plugin in plugins_response_json['data']:
-
-                if plugin['name'] == "ip-restriction" and plugin['service'] and plugin['service']['id'] == service_response_json['id']:
-                    check_ip_plugin_exist = True
-
-                if plugin['name'] == "gluu-metrics":
-                    check_metrics_plugin_exist = True
-
-        ip_plugin_response = None
-        if not check_ip_plugin_exist:
-            self.log_it('Configuring ip-restriction globally...')
-            service_endpoint = 'http://localhost:%s/plugins' % self.kong_admin_listen_port
-            payload = {
-                'name': 'ip-restriction',
-                'service': {
-                    'id': service_response_json['id']
-                },
-                'config': {
-                    'whitelist': [self.gluu_prometheus_server_ip]
-                },
-            }
-            ip_plugin_response = self.http_post_call(service_endpoint, payload)
-
-        # Configuring gluu-metrics plugin globally
-        if not check_metrics_plugin_exist:
-            self.log_it('Configuring gluu-metrics globally...')
-            service_endpoint = 'http://localhost:%s/plugins' % self.kong_admin_listen_port
-            payload = {
-                'name': 'gluu-metrics',
-                'config': {
-                    'ip_restrict_plugin_id': ip_plugin_response['id'],
-                    'gluu_prometheus_server_host': self.gluu_prometheus_server_host
-                },
-            }
-            self.http_post_call(service_endpoint, payload)
-
-        # Register Customer's metrics host at gluu
-        self.log_it('Register Customer at gluu...')
-        registration_endpoint = self.gluu_customer_registration_endpoint
-        payload = {
-            'email': self.admin_email,
-            'organization': self.org_name,
-            'metrics_host': self.host_name
-        }
-        self.http_post_call(registration_endpoint, payload)
-
     def http_post_call(self, endpoint, payload):
         response = None
         try:
@@ -977,7 +879,6 @@ SOFTWARE.
                 kongSetup.install_plugins()
                 kongSetup.migrate_kong()
                 kongSetup.start_kong()
-                kongSetup.configure_metrics()
                 kongSetup.configure_install_oxd()
                 kongSetup.config_konga()
                 kongSetup.start_gg_service()

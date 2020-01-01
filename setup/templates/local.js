@@ -40,10 +40,10 @@ module.exports = {
       host: process.env.DB_HOST || 'localhost',
       user: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD || '%(pg_pwd)s',
-      port: process.env.DB_PORT || 5432,
+      port: process.env.DB_PORT && parseInt(process.env.DB_PORT) || 5432,
       database: process.env.DB_DATABASE || 'konga',
-      poolSize: process.env.DB_POOLSIZE || 10,
-      ssl: process.env.DB_SSL || false
+      poolSize: process.env.DB_POOLSIZE && parseInt(process.env.DB_POOLSIZE) || 10,
+      ssl: process.env.DB_SSL && JSON.parse(process.env.DB_SSL.toLowerCase()) || false
     }
   },
 
@@ -59,12 +59,13 @@ module.exports = {
     key: fs.readFileSync(process.env.SSL_KEY_PATH || '%(kong_ssl_key)s'),
     cert: fs.readFileSync(process.env.SSL_CERT_PATH || '%(kong_ssl_cert)s')
   },
-  hookTimeout: process.env.HOOK_TIMEOUT || 180000, // miliseconds
-  port: process.env.PORT || %(konga_port)s,
+  hookTimeout: process.env.HOOK_TIMEOUT && parseInt(process.env.HOOK_TIMEOUT) || 180000, // miliseconds
+  port: process.env.PORT && parseInt(process.env.PORT) || %(konga_port)s,
   environment: 'production',
   log: {
     level: process.env.LOG_LEVEL || 'info'
   },
+  ggHost: process.env.GG_HOST || '%(host_name)s',
   oxdWeb: process.env.OXD_SERVER_URL || '%(konga_oxd_web)s',
   opHost: process.env.OP_SERVER_URL || '%(konga_op_host)s',
   oxdId: process.env.OXD_ID || '%(konga_oxd_id)s',
