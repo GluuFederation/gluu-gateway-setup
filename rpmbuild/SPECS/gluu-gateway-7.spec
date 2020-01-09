@@ -2,7 +2,7 @@ Name:		gluu-gateway
 Version:	%VERSION%
 Release:	%RELEASE%
 Summary:	OAuth protected API
-License:	The Gluu Support License (GLUU-SUPPORT)
+License:	Apache-2.0
 URL:		https://www.gluu.org
 Source0:	gluu-gateway-4.0.tar.gz
 Source1:	gluu-gateway.service
