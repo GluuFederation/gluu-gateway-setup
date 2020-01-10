@@ -12,7 +12,7 @@
 SERVICE_NAME=konga
 PID_PATH_NAME=/var/run/konga.pid
 TMP_PID_PATH_NAME=/tmp/konga.pid
-BASEDIR=/opt/gluu-gateway/konga/
+BASEDIR=/opt/gluu-gateway-ui
 KONGA_INIT_LOG=/var/log/konga.log
 
 get_pid() {
