@@ -2,7 +2,7 @@ debian/konga etc/init.d
 debian/kong etc/init.d
 gluu-gateway-ui opt/
 gluu-gateway opt/
-setup opt/gluu-gateway-setup/
+setup/* opt/gluu-gateway-setup/
 gg_bower_components.tar.gz opt/gluu-gateway/dist
 gg_node_modules.tar.gz opt/gluu-gateway/dist
 %OXD_SERVER% /tmp/
