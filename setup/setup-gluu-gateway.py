@@ -206,8 +206,8 @@ class KongSetup(object):
             self.run(['/etc/init.d/postgresql', 'start'])
             os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
-            os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
-            os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_gluu_gateway_ui_db_file)
+            # os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
+            # os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_gluu_gateway_ui_db_file)
         if self.os_type == Distribution.Debian:
             self.run(['/etc/init.d/postgresql', 'start'])
             os.system('/bin/su -s /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\"" postgres' % self.pg_pwd)
@@ -481,6 +481,10 @@ class KongSetup(object):
         except:
             self.log_it("Error encountered while extracting archive %s" % self.gg_bower_modules_archive)
             self.log_it(traceback.format_exc(), True)
+
+        self.run(['npm', 'install', '--unsafe-perm'], self.dist_gluu_gateway_ui_folder, os.environ.copy(), True)
+        # konga db migration
+        self.run([self.cmd_sh, '%s/start.sh' % self.dist_gluu_gateway_ui_folder, '-c prepare -a postgres -u postgres://postgres:%s@localhost:5432/konga' % self.pg_pwd], self.dist_gluu_gateway_ui_folder, os.environ.copy(), True)
 
         if self.generate_client:
             msg = 'Creating OXD OP client for Gluu Gateway GUI used to call oxd-server endpoints...'
