@@ -31,7 +31,7 @@ module.exports = {
   /**
    * The default fallback URL to Kong's admin API.
    */
-  kong_admin_url: process.env.KONG_ADMIN_URL || '%(konga_kong_admin_web_url)s',
+  kong_admin_url: process.env.KONG_ADMIN_URL || '%(gluu_gateway_ui_kong_admin_web_url)s',
 
 
   connections: {
@@ -60,18 +60,18 @@ module.exports = {
     cert: fs.readFileSync(process.env.SSL_CERT_PATH || '%(kong_ssl_cert)s')
   },
   hookTimeout: process.env.HOOK_TIMEOUT && parseInt(process.env.HOOK_TIMEOUT) || 180000, // miliseconds
-  port: process.env.PORT && parseInt(process.env.PORT) || %(konga_port)s,
+  port: process.env.PORT && parseInt(process.env.PORT) || %(gluu_gateway_ui_port)s,
   environment: 'production',
   log: {
     level: process.env.LOG_LEVEL || 'info'
   },
   ggHost: process.env.GG_HOST || '%(host_name)s',
-  oxdWeb: process.env.OXD_SERVER_URL || '%(konga_oxd_web)s',
-  opHost: process.env.OP_SERVER_URL || '%(konga_op_host)s',
-  oxdId: process.env.OXD_ID || '%(konga_oxd_id)s',
-  clientId: process.env.CLIENT_ID || '%(konga_client_id)s',
-  clientSecret: process.env.CLIENT_SECRET || '%(konga_client_secret)s',
-  oxdVersion: process.env.OXD_SERVER_VERSION || '%(konga_oxd_version)s',
+  oxdWeb: process.env.OXD_SERVER_URL || '%(gluu_gateway_ui_oxd_web)s',
+  opHost: process.env.OP_SERVER_URL || '%(gluu_gateway_ui_op_host)s',
+  oxdId: process.env.OXD_ID || '%(gluu_gateway_ui_oxd_id)s',
+  clientId: process.env.CLIENT_ID || '%(gluu_gateway_ui_client_id)s',
+  clientSecret: process.env.CLIENT_SECRET || '%(gluu_gateway_ui_client_secret)s',
+  oxdVersion: process.env.OXD_SERVER_VERSION || '%(gluu_gateway_ui_oxd_version)s',
   ggVersion: process.env.GG_VERSION || '%(gg_version)s',
   postgresVersion: process.env.POSTGRES_VERSION || '%(postgres_version)s',
   explicitHost: process.env.EXPLICIT_HOST || 'localhost',

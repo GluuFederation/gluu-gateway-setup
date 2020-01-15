@@ -83,11 +83,11 @@ class KongSetup(object):
 
         self.opt_folder = '/opt'
         self.dist_gluu_gateway_folder = '%s/gluu-gateway' % self.opt_folder
-        self.dist_konga_folder = '%s/konga' % self.dist_gluu_gateway_folder
-        self.dist_konga_assest_folder = '%s/assets' % self.dist_konga_folder
-        self.dist_konga_config_folder = '%s/config' % self.dist_konga_folder
-        self.dist_konga_config_file = '%s/config/local.js' % self.dist_konga_folder
-        self.dist_konga_db_file = '%s/setup/templates/konga_db.sql' % self.dist_gluu_gateway_folder
+        self.dist_gluu_gateway_ui_folder = '%s/gluu-gateway-ui' % self.opt_folder
+        self.dist_gluu_gateway_ui_assest_folder = '%s/assets' % self.dist_gluu_gateway_ui_folder
+        self.dist_gluu_gateway_ui_config_folder = '%s/config' % self.dist_gluu_gateway_ui_folder
+        self.dist_gluu_gateway_ui_config_file = '%s/config/local.js' % self.dist_gluu_gateway_ui_folder
+        self.dist_gluu_gateway_ui_db_file = '%s/templates/gluu_gateway_ui_db.sql' % self.dist_gluu_gateway_folder
         self.gg_plugins_folder = '%s/kong/plugins' % self.dist_gluu_gateway_folder
         self.gluu_oauth_auth_plugin = '%s/gluu-oauth-auth' % self.gg_plugins_folder
         self.gluu_oauth_pep_plugin = '%s/gluu-oauth-pep' % self.gg_plugins_folder
@@ -108,22 +108,22 @@ class KongSetup(object):
         self.oxd_server_service = 'oxd-server' # change this when oxd-server-4.0 is released
 
         # oxd kong Property values
-        self.konga_port = '1338'
-        self.konga_policy_type = 'uma_rpt_policy'
-        self.konga_oxd_id = ''
-        self.konga_op_host = ''
-        self.konga_client_id = ''
-        self.konga_client_secret = ''
-        self.konga_oxd_web = ''
-        self.konga_kong_admin_web_url = 'http://localhost:%s' % self.kong_admin_listen_port
-        self.konga_oxd_version = '4.0'
+        self.gluu_gateway_ui_port = '1338'
+        self.gluu_gateway_ui_policy_type = 'uma_rpt_policy'
+        self.gluu_gateway_ui_oxd_id = ''
+        self.gluu_gateway_ui_op_host = ''
+        self.gluu_gateway_ui_client_id = ''
+        self.gluu_gateway_ui_client_secret = ''
+        self.gluu_gateway_ui_oxd_web = ''
+        self.gluu_gateway_ui_kong_admin_web_url = 'http://localhost:%s' % self.kong_admin_listen_port
+        self.gluu_gateway_ui_oxd_version = '4.0'
         self.gg_version = '4.0'
         self.postgres_version = '10.x'
 
         # oxd licence configuration
         self.install_oxd = True
         self.generate_client = True
-        self.konga_redirect_uri = 'localhost'
+        self.gluu_gateway_ui_redirect_uri = 'localhost'
 
         # JRE setup properties
         self.jre_version = '162'
@@ -147,8 +147,8 @@ class KongSetup(object):
         self.dist_pg_hba_config_file = '%s/pg_hba.conf' % self.dist_pg_hba_config_path
 
         # dependency zips
-        self.gg_node_modules_folder = "%s/node_modules" % self.dist_konga_folder
-        self.gg_bower_modules_folder = "%s/bower_components" % self.dist_konga_assest_folder
+        self.gg_node_modules_folder = "%s/node_modules" % self.dist_gluu_gateway_ui_folder
+        self.gg_bower_modules_folder = "%s/bower_components" % self.dist_gluu_gateway_ui_assest_folder
         self.gg_node_modules_archive = 'gg_node_modules.tar.gz'
         self.gg_bower_modules_archive = 'gg_bower_components.tar.gz'
 
@@ -188,16 +188,16 @@ class KongSetup(object):
             self.org_name = data['org_name']
             self.admin_email = data['admin_email']
             self.pg_pwd = data['pg_pwd']
-            self.konga_redirect_uri = data['konga_redirect_uri']
+            self.gluu_gateway_ui_redirect_uri = data['gluu_gateway_ui_redirect_uri']
             self.install_oxd = data['install_oxd']
-            self.konga_op_host = 'https://' + data['konga_op_host']
-            self.konga_oxd_web = data['konga_oxd_web']
+            self.gluu_gateway_ui_op_host = 'https://' + data['gluu_gateway_ui_op_host']
+            self.gluu_gateway_ui_oxd_web = data['gluu_gateway_ui_oxd_web']
             self.generate_client = data['generate_client']
 
             if not self.generate_client:
-                self.konga_oxd_id = data['konga_oxd_id']
-                self.konga_client_id = data['konga_client_id']
-                self.konga_client_secret = data['konga_client_secret']
+                self.gluu_gateway_ui_oxd_id = data['gluu_gateway_ui_oxd_id']
+                self.gluu_gateway_ui_client_id = data['gluu_gateway_ui_client_id']
+                self.gluu_gateway_ui_client_secret = data['gluu_gateway_ui_client_secret']
 
     def configure_postgres(self):
         self.log_it('Configuring postgres...')
@@ -207,13 +207,13 @@ class KongSetup(object):
             os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
-            os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_konga_db_file)
+            os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_gluu_gateway_ui_db_file)
         if self.os_type == Distribution.Debian:
             self.run(['/etc/init.d/postgresql', 'start'])
             os.system('/bin/su -s /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\"" postgres' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
-            os.system('/bin/su -s /bin/bash -c "psql konga < %s" postgres' % self.dist_konga_db_file)
+            os.system('/bin/su -s /bin/bash -c "psql konga < %s" postgres' % self.dist_gluu_gateway_ui_db_file)
         if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '7':
             # Initialize PostgreSQL first time
             self.run([self.cmd_ln, '/usr/lib/systemd/system/postgresql-10.service', '/usr/lib/systemd/system/postgresql.service'])
@@ -224,7 +224,7 @@ class KongSetup(object):
             os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
-            os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_konga_db_file)
+            os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_gluu_gateway_ui_db_file)
         if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '6':
             # Initialize PostgreSQL first time
             self.run([self.cmd_ln, '/etc/init.d/postgresql-10', '/etc/init.d/postgresql'])
@@ -234,7 +234,7 @@ class KongSetup(object):
             os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
-            os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_konga_db_file)
+            os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_gluu_gateway_ui_db_file)
 
     def configure_install_oxd(self):
         if not self.install_oxd:
@@ -459,9 +459,9 @@ class KongSetup(object):
         elif self.os_type in [Distribution.CENTOS, Distribution.RHEL]:
             self.run([self.cmd_alternatives, '--install', '/usr/bin/java', 'java', '%s/bin/java' % (self.jre_home), '1'])
 
-    def config_konga(self):
-        self.log_it('Installing konga node packages...')
-        print 'Installing konga node packages...'
+    def config_gluu_gateway_ui(self):
+        self.log_it('Installing gluu_gateway_ui node packages...')
+        print 'Installing gluu_gateway_ui node packages...'
 
         if not os.path.exists(self.cmd_node):
             self.run([self.cmd_ln, '-s', '`which nodejs`', self.cmd_node])
@@ -486,10 +486,10 @@ class KongSetup(object):
             msg = 'Creating OXD OP client for Gluu Gateway GUI used to call oxd-server endpoints...'
             self.log_it(msg)
             print msg
-            oxd_registration_endpoint = self.konga_oxd_web + '/register-site'
-            redirect_uri = 'https://' + self.konga_redirect_uri + ':' + self.konga_port
+            oxd_registration_endpoint = self.gluu_gateway_ui_oxd_web + '/register-site'
+            redirect_uri = 'https://' + self.gluu_gateway_ui_redirect_uri + ':' + self.gluu_gateway_ui_port
             payload = {
-                'op_host': self.konga_op_host,
+                'op_host': self.gluu_gateway_ui_op_host,
                 'redirect_uris': [redirect_uri],
                 'post_logout_redirect_uris': [redirect_uri],
                 'scope': ['openid', 'oxd', 'permission', 'username'],
@@ -498,14 +498,14 @@ class KongSetup(object):
             }
 
             oxd_registration_response = self.http_post_call(oxd_registration_endpoint, payload)
-            self.konga_oxd_id = oxd_registration_response['oxd_id']
-            self.konga_client_secret = oxd_registration_response['client_secret']
-            self.konga_client_id = oxd_registration_response['client_id']
+            self.gluu_gateway_ui_oxd_id = oxd_registration_response['oxd_id']
+            self.gluu_gateway_ui_client_secret = oxd_registration_response['client_secret']
+            self.gluu_gateway_ui_client_id = oxd_registration_response['client_id']
 
-        # Render konga property
-        self.run([self.cmd_touch, os.path.split(self.dist_konga_config_file)[-1]],
-                 self.dist_konga_config_folder, os.environ.copy(), True)
-        self.render_template_in_out(self.dist_konga_config_file, self.template_folder, self.dist_konga_config_folder)
+        # Render gluu_gateway_ui property
+        self.run([self.cmd_touch, os.path.split(self.dist_gluu_gateway_ui_config_file)[-1]],
+                 self.dist_gluu_gateway_ui_config_folder, os.environ.copy(), True)
+        self.render_template_in_out(self.dist_gluu_gateway_ui_config_file, self.template_folder, self.dist_gluu_gateway_ui_config_folder)
 
     def is_ip(self, address):
         try:
@@ -558,7 +558,7 @@ Postgres DB, then enter existing password, otherwise enter new password: """
         self.pg_pwd = getpass.getpass(prompt='Password [%s] : ' % pg) or pg
 
         # We are going to ask for 'OP host_name' regardless of whether we're installing oxd or not
-        self.konga_op_host = 'https://' + self.get_prompt('OP Server Host')
+        self.gluu_gateway_ui_op_host = 'https://' + self.get_prompt('OP Server Host')
 
         # Konga Configuration
         msg = """
@@ -569,16 +569,16 @@ make sure it's available from this server."""
 
         self.install_oxd = self.make_boolean(self.get_prompt("Install OXD Server? (y - install, n - skip)", 'y'))
         if self.install_oxd:
-            self.konga_oxd_web = self.get_prompt('OXD Server URL', 'https://%s:8443' % self.host_name)
+            self.gluu_gateway_ui_oxd_web = self.get_prompt('OXD Server URL', 'https://%s:8443' % self.host_name)
         else:
-            self.konga_oxd_web = self.get_prompt('Enter your existing OXD server URL', 'https://%s:8443' % self.host_name)
+            self.gluu_gateway_ui_oxd_web = self.get_prompt('Enter your existing OXD server URL', 'https://%s:8443' % self.host_name)
 
         self.generate_client = self.make_boolean(self.get_prompt("Generate client credentials to call oxd-server API's? (y - generate, n - enter existing client credentials manually)", 'y'))
 
         if not self.generate_client:
-            self.konga_oxd_id = self.get_prompt('OXD Id')
-            self.konga_client_id = self.get_prompt('Client Id')
-            self.konga_client_secret = self.get_prompt('Client Secret')
+            self.gluu_gateway_ui_oxd_id = self.get_prompt('OXD Id')
+            self.gluu_gateway_ui_client_id = self.get_prompt('Client Id')
+            self.gluu_gateway_ui_client_secret = self.get_prompt('Client Secret')
 
     def install_config_kong(self):
         # Install OXD
@@ -850,13 +850,13 @@ SOFTWARE.
                   + 'State'.ljust(30) + kongSetup.state.rjust(35) + "\n" \
                   + 'Country'.ljust(30) + kongSetup.country_code.rjust(35) + "\n" \
                   + 'Install OXD?'.ljust(30) + repr(kongSetup.install_oxd).rjust(35) + "\n" \
-                  + 'OXD Server URL'.ljust(30) + kongSetup.konga_oxd_web.rjust(35) + "\n" \
-                  + 'OP Host'.ljust(30) + kongSetup.konga_op_host.rjust(35) + "\n"
+                  + 'OXD Server URL'.ljust(30) + kongSetup.gluu_gateway_ui_oxd_web.rjust(35) + "\n" \
+                  + 'OP Host'.ljust(30) + kongSetup.gluu_gateway_ui_op_host.rjust(35) + "\n"
 
             if not kongSetup.generate_client:
-                cnf += 'OXD Id'.ljust(30) + kongSetup.konga_oxd_id.rjust(35) + "\n" \
-                       + 'Client Id'.ljust(30) + kongSetup.konga_client_id.rjust(35) + "\n" \
-                       + 'Client Secret'.ljust(30) + kongSetup.konga_client_secret.rjust(35) + "\n"
+                cnf += 'OXD Id'.ljust(30) + kongSetup.gluu_gateway_ui_oxd_id.rjust(35) + "\n" \
+                       + 'Client Id'.ljust(30) + kongSetup.gluu_gateway_ui_client_id.rjust(35) + "\n" \
+                       + 'Client Secret'.ljust(30) + kongSetup.gluu_gateway_ui_client_secret.rjust(35) + "\n"
             else:
                 cnf += 'Generate Client Credentials?'.ljust(30) + repr(kongSetup.generate_client).rjust(35) + "\n"
 
@@ -880,9 +880,9 @@ SOFTWARE.
                 kongSetup.migrate_kong()
                 kongSetup.start_kong()
                 kongSetup.configure_install_oxd()
-                kongSetup.config_konga()
+                kongSetup.config_gluu_gateway_ui()
                 kongSetup.start_gg_service()
-                print "\n\nGluu Gateway configuration successful!!! https://localhost:%s\n\n" % kongSetup.konga_port
+                print "\n\nGluu Gateway configuration successful!!! https://localhost:%s\n\n" % kongSetup.gluu_gateway_ui_port
             else:
                 print "Exit"
         else:
