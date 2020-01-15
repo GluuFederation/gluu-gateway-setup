@@ -84,10 +84,11 @@ class KongSetup(object):
         self.opt_folder = '/opt'
         self.dist_gluu_gateway_folder = '%s/gluu-gateway' % self.opt_folder
         self.dist_gluu_gateway_ui_folder = '%s/gluu-gateway-ui' % self.opt_folder
+        self.dist_gluu_gateway_setup_folder = '%s/gluu-gateway-setup' % self.opt_folder
         self.dist_gluu_gateway_ui_assest_folder = '%s/assets' % self.dist_gluu_gateway_ui_folder
         self.dist_gluu_gateway_ui_config_folder = '%s/config' % self.dist_gluu_gateway_ui_folder
         self.dist_gluu_gateway_ui_config_file = '%s/config/local.js' % self.dist_gluu_gateway_ui_folder
-        self.dist_gluu_gateway_ui_db_file = '%s/templates/gluu_gateway_ui_db.sql' % self.dist_gluu_gateway_folder
+        self.dist_gluu_gateway_ui_db_file = '%s/templates/gluu_gateway_ui_db.sql' % self.dist_gluu_gateway_setup_folder
         self.gg_plugins_folder = '%s/kong/plugins' % self.dist_gluu_gateway_folder
         self.gluu_oauth_auth_plugin = '%s/gluu-oauth-auth' % self.gg_plugins_folder
         self.gluu_oauth_pep_plugin = '%s/gluu-oauth-pep' % self.gg_plugins_folder
