@@ -71,6 +71,7 @@ su postgres -c "psql -c \"DROP DATABASE konga;\"" > /dev/null 2>&1
 fi
 
 %files
+/opt/*
 %config(missingok, noreplace) /opt/gluu-gateway-ui/config/application.js
 %config(missingok, noreplace) /opt/gluu-gateway-ui/config/blueprints.js
 %config(missingok, noreplace) /opt/gluu-gateway-ui/config/bootstrap.js
@@ -99,9 +100,6 @@ fi
 %config(missingok, noreplace) /opt/gluu-gateway-ui/config/locales/_README.md
 %config(missingok, noreplace) /opt/gluu-gateway-ui/config/env/development.js
 %config(missingok, noreplace) /opt/gluu-gateway-ui/config/env/production.js
-/opt/gluu-gateway/*
-/opt/gluu-gateway-ui/*
-/opt/gluu-gateway-setup/*
 /lib/systemd/system/kong.service
 /lib/systemd/system/konga.service
 /lib/systemd/system/gluu-gateway.service
