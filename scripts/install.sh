@@ -38,7 +38,7 @@ function prepareSourcesCentos7 {
     mkswap /myswap
     swapon /myswap
     yum -y install wget curl lsof xvfb
-    wget https://repo.gluu.org/centos/Gluu-centos-7-testing.repo -O /etc/yum.repos.d/Gluu.repo
+    wget https://repo.gluu.org/centos/Gluu-centos7.repo -O /etc/yum.repos.d/Gluu.repo
     wget https://repo.gluu.org/centos/RPM-GPG-KEY-GLUU -O /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU
     rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU
     rpm -Uvh https://yum.postgresql.org/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm
@@ -76,7 +76,7 @@ function configureGG {
  # Used to open port publicly
  sed -i "76s/explicitHost: process.env.EXPLICIT_HOST || 'localhost'/explicitHost: '0.0.0.0'/" /opt/gluu-gateway/setup/templates/local.js
 
- cd /opt/gluu-gateway-setup
+ cd /opt/gluu-gateway/setup
  python setup-gluu-gateway.py '{"konga_redirect_uri":"'$HOST'","konga_oxd_web":"https://'$OXD_HOST':8443","license":true,"ip":"'$HOST_IP'","host_name":"'$HOST'","country_code":"US","state":"US","city":"NY","org_name":"Test","admin_email":"test@test.com","pg_pwd":"admin","install_oxd":true,"konga_op_host":"'$OP_HOST'","generate_client":true}'
 }
 
