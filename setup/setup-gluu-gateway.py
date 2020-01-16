@@ -387,9 +387,6 @@ class KongSetup(object):
 
     def install_plugins(self):
         self.log_it('Installing luarocks packages...')
-        # oxd-web-lua
-        self.run([self.cmd_mkdir, '-p', self.dist_gluu_lua_folder])
-        self.run([self.cmd_cp, self.oxd_web_lua_file_path, self.dist_gluu_lua_folder])
 
         # json-logic-lua
         self.run([self.cmd_mkdir, '-p', '%s/rucciva' % self.dist_lua_folder])
@@ -417,7 +414,10 @@ class KongSetup(object):
             self.run([self.cmd_cp, '-R', "%s/%s" % (self.gg_plugins_folder, plugin), self.dist_kong_plugins_folder])
 
         # gluu plugins common file
-        self.run([self.cmd_cp, '-R', '%s' % self.gg_comman_folder, self.dist_gluu_lua_folder])
+        self.run([self.cmd_cp, '-R', '%s' % self.gg_comman_folder, self.dist_lua_folder])
+
+        # oxd-web-lua
+        self.run([self.cmd_cp, self.oxd_web_lua_file_path, self.dist_gluu_lua_folder])
 
         # Disable kong stock auth plugins
         for plugin in self.disable_plugin_list:
