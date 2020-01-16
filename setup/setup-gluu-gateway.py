@@ -89,17 +89,9 @@ class KongSetup(object):
         self.dist_gluu_gateway_ui_config_folder = '%s/config' % self.dist_gluu_gateway_ui_folder
         self.dist_gluu_gateway_ui_config_file = '%s/config/local.js' % self.dist_gluu_gateway_ui_folder
         self.dist_gluu_gateway_ui_db_file = '%s/templates/gluu_gateway_ui_db.sql' % self.dist_gluu_gateway_setup_folder
-        self.gg_plugins_folder = '%s/kong/plugins' % self.dist_gluu_gateway_folder
-        self.gluu_oauth_auth_plugin = '%s/gluu-oauth-auth' % self.gg_plugins_folder
-        self.gluu_oauth_pep_plugin = '%s/gluu-oauth-pep' % self.gg_plugins_folder
-        self.gluu_uma_auth_plugin = '%s/gluu-uma-auth' % self.gg_plugins_folder
-        self.gluu_uma_pep_plugin = '%s/gluu-uma-pep' % self.gg_plugins_folder
-        self.gluu_openid_connect_plugin = '%s/gluu-openid-connect' % self.gg_plugins_folder
-        self.gluu_metrics_plugin = '%s/gluu-metrics' % self.gg_plugins_folder
-        self.gluu_opa_pep_plugin = '%s/gluu-opa-pep' % self.gg_plugins_folder
+        self.gg_plugins_folder = '%s/lib/kong/plugins' % self.dist_gluu_gateway_folder
         self.disable_plugin_list = ['ldap-auth', 'key-auth', 'basic-auth', 'jwt', 'oauth2', 'hmac-auth']
-        self.gg_comman_folder = '%s/kong/common' % self.dist_gluu_gateway_folder
-        self.gg_disable_plugin_stub_folder = '%s/kong/disable_plugin_stub' % self.dist_gluu_gateway_folder
+        self.gg_comman_folder = '%s/lib/gluu' % self.dist_gluu_gateway_folder
 
         self.dist_oxd_server_folder = '%s/oxd-server' % self.opt_folder
         self.dist_oxd_server_config_folder = '%s/conf' % self.dist_oxd_server_folder
@@ -350,8 +342,8 @@ class KongSetup(object):
 
     def gen_kong_ssl_certificate(self):
         self.gen_cert('gluu-gateway', self.get_pw())
-        self.kong_ssl_cert = self.dist_gluu_gateway_folder + '/setup/certs/gluu-gateway.crt'
-        self.kong_ssl_key = self.dist_gluu_gateway_folder + '/setup/certs/gluu-gateway.key'
+        self.kong_ssl_cert = self.dist_gluu_gateway_setup_folder + '/certs/gluu-gateway.crt'
+        self.kong_ssl_key = self.dist_gluu_gateway_setup_folder + '/certs/gluu-gateway.key'
 
     def get_ip(self):
         test_ip = None
@@ -421,23 +413,16 @@ class KongSetup(object):
         self.run([self.cmd_cp, self.prometheus_file_path, self.dist_lua_folder])
 
         # gluu plugins
-        self.run([self.cmd_cp, '-R', self.gluu_oauth_auth_plugin, self.dist_kong_plugins_folder])
-        self.run([self.cmd_cp, '-R', self.gluu_oauth_pep_plugin, self.dist_kong_plugins_folder])
-        self.run([self.cmd_cp, '-R', self.gluu_uma_pep_plugin, self.dist_kong_plugins_folder])
-        self.run([self.cmd_cp, '-R', self.gluu_uma_auth_plugin, self.dist_kong_plugins_folder])
-        self.run([self.cmd_cp, '-R', self.gluu_openid_connect_plugin, self.dist_kong_plugins_folder])
-        self.run([self.cmd_cp, '-R', self.gluu_metrics_plugin, self.dist_kong_plugins_folder])
-        self.run([self.cmd_cp, '-R', self.gluu_opa_pep_plugin, self.dist_kong_plugins_folder])
+        for plugin in self.kong_custom_plugins.split(","):
+            self.run([self.cmd_cp, '-R', "%s/%s" % (self.gg_plugins_folder, plugin), self.dist_kong_plugins_folder])
 
         # gluu plugins common file
-        self.run([self.cmd_cp, '-R', '%s/kong-common.lua' % self.gg_comman_folder, self.dist_gluu_lua_folder])
-        self.run([self.cmd_cp, '-R', '%s/path-wildcard-tree.lua' % self.gg_comman_folder, self.dist_gluu_lua_folder])
-        self.run([self.cmd_cp, '-R', '%s/json-cache.lua' % self.gg_comman_folder, self.dist_gluu_lua_folder])
+        self.run([self.cmd_cp, '-R', '%s' % self.gg_comman_folder, self.dist_gluu_lua_folder])
 
         # Disable kong stock auth plugins
         for plugin in self.disable_plugin_list:
-            self.run([self.cmd_cp, '-R', '%s/handler.lua' % self.gg_disable_plugin_stub_folder, "%s/%s" % (self.dist_kong_plugins_folder, plugin)])
-            self.run([self.cmd_cp, '-R', '%s/migrations/init.lua' % self.gg_disable_plugin_stub_folder, "%s/%s/migrations" % (self.dist_kong_plugins_folder, plugin)])
+            self.run([self.cmd_cp, '-R', '%s/disable-plugin-handler.lua' % self.gg_comman_folder, "%s/%s/handler.lua" % (self.dist_kong_plugins_folder, plugin)])
+            self.run([self.cmd_rm, '-rf', '%s/%s/migrations' % (self.dist_kong_plugins_folder, plugin)])
             self.run([self.cmd_rm, '-R', '%s/%s/daos.lua' % (self.dist_kong_plugins_folder, plugin)])
 
     def install_jre(self):
@@ -483,7 +468,6 @@ class KongSetup(object):
             self.log_it("Error encountered while extracting archive %s" % self.gg_bower_modules_archive)
             self.log_it(traceback.format_exc(), True)
 
-        self.run(['npm', 'install', '--unsafe-perm'], self.dist_gluu_gateway_ui_folder, os.environ.copy(), True)
         # konga db migration
         self.run([self.cmd_sh, '%s/start.sh' % self.dist_gluu_gateway_ui_folder, '-c prepare -a postgres -u postgres://postgres:%s@localhost:5432/konga' % self.pg_pwd], self.dist_gluu_gateway_ui_folder, os.environ.copy(), True)
 
