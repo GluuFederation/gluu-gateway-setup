@@ -48,6 +48,7 @@ class KongSetup(object):
         self.cmd_node = '/usr/bin/node'
         self.cmd_update_rs_d = '/usr/sbin/update-rc.d'
         self.cmd_sh = '/bin/sh'
+        self.cmd_bash = '/bin/bash'
         self.cmd_update_alternatives = 'update-alternatives'
         self.cmd_chkconfig = 'chkconfig'
         self.cmd_alternatives = 'alternatives'
@@ -199,14 +200,12 @@ class KongSetup(object):
             self.run(['/etc/init.d/postgresql', 'start'])
             os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
-            # os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
-            # os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_gluu_gateway_ui_db_file)
+            os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
         if self.os_type == Distribution.Debian:
             self.run(['/etc/init.d/postgresql', 'start'])
             os.system('/bin/su -s /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\"" postgres' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
-            os.system('/bin/su -s /bin/bash -c "psql konga < %s" postgres' % self.dist_gluu_gateway_ui_db_file)
         if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '7':
             # Initialize PostgreSQL first time
             self.run([self.cmd_ln, '/usr/lib/systemd/system/postgresql-10.service', '/usr/lib/systemd/system/postgresql.service'])
@@ -217,7 +216,6 @@ class KongSetup(object):
             os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
-            os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_gluu_gateway_ui_db_file)
         if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '6':
             # Initialize PostgreSQL first time
             self.run([self.cmd_ln, '/etc/init.d/postgresql-10', '/etc/init.d/postgresql'])
@@ -227,7 +225,6 @@ class KongSetup(object):
             os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
-            os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_gluu_gateway_ui_db_file)
 
     def configure_install_oxd(self):
         if not self.install_oxd:
@@ -469,7 +466,7 @@ class KongSetup(object):
             self.log_it(traceback.format_exc(), True)
 
         # konga db migration
-        self.run([self.cmd_sh, '%s/start.sh' % self.dist_gluu_gateway_ui_folder, '-c prepare -a postgres -u postgres://postgres:%s@localhost:5432/konga' % self.pg_pwd], self.dist_gluu_gateway_ui_folder, os.environ.copy(), True)
+        self.run([self.cmd_bash, '%s/start.sh' % self.dist_gluu_gateway_ui_folder, '-c prepare -a postgres -u postgres://postgres:%s@localhost:5432/konga' % self.pg_pwd], self.dist_gluu_gateway_ui_folder, os.environ.copy(), True)
 
         if self.generate_client:
             msg = 'Creating OXD OP client for Gluu Gateway GUI used to call oxd-server endpoints...'
