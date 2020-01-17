@@ -466,7 +466,7 @@ class KongSetup(object):
             self.log_it(traceback.format_exc(), True)
 
         # konga db migration
-        self.run([self.cmd_bash, '%s/start.sh' % self.dist_gluu_gateway_ui_folder, '-c prepare -a postgres -u postgres://postgres:%s@localhost:5432/konga' % self.pg_pwd], self.dist_gluu_gateway_ui_folder, os.environ.copy(), True)
+        self.run(['npm', 'run', 'db-migrate', 'postgres://postgres:%s@localhost:5432/konga' % self.pg_pwd], self.dist_gluu_gateway_ui_folder, os.environ.copy(), True)
 
         if self.generate_client:
             msg = 'Creating OXD OP client for Gluu Gateway GUI used to call oxd-server endpoints...'
