@@ -13,7 +13,7 @@ function prepareSourcesBionic {
     curl https://repo.gluu.org/ubuntu/gluu-apt.key | apt-key add -
     echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" > /etc/apt/sources.list.d/psql.list
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
     pkill .*upgrade.*
     rm /var/lib/dpkg/lock-frontend
     sleep 200
@@ -26,7 +26,7 @@ function prepareSourcesXenial {
     curl https://repo.gluu.org/ubuntu/gluu-apt.key | apt-key add -
     echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" > /etc/apt/sources.list.d/psql.list
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
     pkill .*upgrade.*
     rm /var/lib/dpkg/lock
     sleep 120
@@ -42,7 +42,7 @@ function prepareSourcesCentos7 {
     wget https://repo.gluu.org/centos/RPM-GPG-KEY-GLUU -O /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU
     rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU
     rpm -Uvh https://yum.postgresql.org/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm
-    curl -sL https://rpm.nodesource.com/setup_8.x | sudo -E bash -
+    curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
 }
 
 function prepareSourcesForDistribution {
