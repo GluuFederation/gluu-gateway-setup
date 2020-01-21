@@ -16,6 +16,14 @@ KONG_ADMIN_HOST='localhost'
 OXD_PORT=8443
 
 function test_oauth_auth_and_pep() {
+    # Add metrics plugin globally
+    sleep 1
+    echo "=================================================="
+    echo "gluu_metrics"
+    echo "=================================================="
+    METRICS_RESPONSE=`curl --location --request POST http://$KONG_ADMIN_HOST:8001/plugins --header 'Content-Type: application/json' --data-raw '{"name":"gluu-metrics"}'`
+    echo "METRICS_RESPONSE: " .. $METRICS_RESPONSE
+
     sleep 1
     echo "=================================================="
     echo "test_oauth_auth_and_pep"
