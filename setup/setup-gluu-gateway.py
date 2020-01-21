@@ -465,9 +465,6 @@ class KongSetup(object):
             self.log_it("Error encountered while extracting archive %s" % self.gg_bower_modules_archive)
             self.log_it(traceback.format_exc(), True)
 
-        # konga db migration
-        self.run(['npm', 'run', 'db-migrate', 'postgres://postgres:%s@localhost:5432/konga' % self.pg_pwd], self.dist_gluu_gateway_ui_folder, os.environ.copy(), True)
-
         if self.generate_client:
             msg = 'Creating OXD OP client for Gluu Gateway GUI used to call oxd-server endpoints...'
             self.log_it(msg)
@@ -492,6 +489,9 @@ class KongSetup(object):
         self.run([self.cmd_touch, os.path.split(self.dist_gluu_gateway_ui_config_file)[-1]],
                  self.dist_gluu_gateway_ui_config_folder, os.environ.copy(), True)
         self.render_template_in_out(self.dist_gluu_gateway_ui_config_file, self.template_folder, self.dist_gluu_gateway_ui_config_folder)
+
+        # konga db migration
+        self.run(['npm', 'run', 'db-migrate', 'postgres://postgres:%s@localhost:5432/konga' % self.pg_pwd], self.dist_gluu_gateway_ui_folder, os.environ.copy(), True)
 
     def is_ip(self, address):
         try:
