@@ -1,6 +1,6 @@
 [Unit]
 Description=Gluu-Gateway server daemon
-After=network.target konga.service
+After=network.target konga.service kong.service oxd-server.service
 Requires=konga.service kong.service oxd-server.service
 
 [Service]
