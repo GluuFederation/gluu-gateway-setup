@@ -21,7 +21,7 @@ function test_oauth_auth_and_pep() {
     echo "=================================================="
     echo "gluu_metrics"
     echo "=================================================="
-    METRICS_RESPONSE=`curl --location --request POST http://$KONG_ADMIN_HOST:8001/plugins --header 'Content-Type: application/json' --data-raw '{"name":"gluu-metrics"}'`
+    METRICS_RESPONSE=`curl -k -X POST http://$KONG_ADMIN_HOST:8001/plugins -H 'Content-Type: application/json' -d '{"name":"gluu-metrics"}'`
     echo "METRICS_RESPONSE: " .. $METRICS_RESPONSE
 
     sleep 1
