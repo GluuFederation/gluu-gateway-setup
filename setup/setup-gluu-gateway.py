@@ -89,7 +89,6 @@ class KongSetup(object):
         self.dist_gluu_gateway_ui_assest_folder = '%s/assets' % self.dist_gluu_gateway_ui_folder
         self.dist_gluu_gateway_ui_config_folder = '%s/config' % self.dist_gluu_gateway_ui_folder
         self.dist_gluu_gateway_ui_config_file = '%s/config/local.js' % self.dist_gluu_gateway_ui_folder
-        self.dist_gluu_gateway_ui_db_file = '%s/templates/gluu_gateway_ui_db.sql' % self.dist_gluu_gateway_setup_folder
         self.gg_plugins_folder = '%s/lib/kong/plugins' % self.dist_gluu_gateway_folder
         self.disable_plugin_list = ['ldap-auth', 'key-auth', 'basic-auth', 'jwt', 'oauth2', 'hmac-auth']
         self.gg_comman_folder = '%s/lib/gluu' % self.dist_gluu_gateway_folder
@@ -383,7 +382,7 @@ class KongSetup(object):
             return None
 
     def install_plugins(self):
-        self.log_it('Installing luarocks packages...')
+        self.log_it('Installing lua packages...')
 
         # json-logic-lua
         self.run([self.cmd_mkdir, '-p', '%s/rucciva' % self.dist_lua_folder])
