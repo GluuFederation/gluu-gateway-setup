@@ -15,6 +15,7 @@ import getpass
 import urllib3
 import platform
 import pwd
+import glob
 
 class Distribution:
     Ubuntu = "ubuntu"
@@ -54,7 +55,7 @@ class KongSetup(object):
         self.cmd_alternatives = 'alternatives'
         self.cmd_echo = '/bin/echo'
         self.cmd_service = 'service'
-        self.cmd_systemctl = 'systemctl'
+        self.cmd_systemctl = os.popen('which systemctl').read().strip()
         self.cmd_rpm = '/bin/rpm'
         self.cmd_dpkg = '/usr/bin/dpkg'
         self.cmd_kong = '/usr/local/bin/kong'
@@ -231,31 +232,27 @@ class KongSetup(object):
             return
 
         # Install OXD
-        oxd_package_file = ''
-        install_oxd_cmd = []
+        self.log_it("Installing oxd server...")
+        oxd_root = '/opt/oxd-server/'
+        self.run(['tar', '-zxf', "%s/oxd-server.tgz" % self.gg_dist_app_folder, '-C', '/opt'])
 
-        if self.os_type == Distribution.Ubuntu and self.os_version == '18':
-            oxd_package_file = "%s/%s" % (self.tmp_folder, self.ubuntu18_oxd_file)
-            install_oxd_cmd = [self.cmd_dpkg, '--install', oxd_package_file]
+        service_file = os.path.join(oxd_root, 'oxd-server.service')
+        if os.path.exists(service_file):
+            self.run([self.cmd_cp, service_file, '/lib/systemd/system'])
+        else:
+            service_file = os.path.join(oxd_root, 'oxd-server.init.d')
+            target_file = '/etc/init.d/oxd-server'
+            self.run([self.cmd_cp, service_file, target_file])
+            self.run([self.cmd_chmod, '+x', target_file])
+            self.run(['update-rc.d', 'oxd-server', 'defaults'])
 
-        if self.os_type == Distribution.Ubuntu and self.os_version == '16':
-            oxd_package_file = "%s/%s" % (self.tmp_folder, self.ubuntu16_oxd_file)
-            install_oxd_cmd = [self.cmd_dpkg, '--install', oxd_package_file]
+        self.run([self.cmd_cp, os.path.join(oxd_root, 'oxd-server-default'),  '/etc/default/oxd-server'])
+        self.run([self.cmd_mkdir, '/var/log/oxd-server'])
 
-        if self.os_type == Distribution.CENTOS and self.os_version == '7':
-            oxd_package_file = "%s/%s" % (self.tmp_folder, self.centos7_oxd_file)
-            install_oxd_cmd = [self.cmd_rpm, '--install', '--verbose', '--hash', oxd_package_file]
+        for fn in glob.glob(os.path.join(oxd_root,'bin/*')):
+            self.run([self.cmd_chmod, '+x', fn])
 
-        if self.os_type == Distribution.RHEL and self.os_version == '7':
-            oxd_package_file = "%s/%s" % (self.tmp_folder, self.rhel7_oxd_file)
-            install_oxd_cmd = [self.cmd_rpm, '--install', '--verbose', '--hash', oxd_package_file]
-
-        if not os.path.exists(oxd_package_file):
-            self.log_it("%s is not found" % oxd_package_file)
-            sys.exit(0)
-
-        self.run(install_oxd_cmd)
-
+        self.enable_service_at_start('oxd-server')
         self.render_template_in_out(self.dist_oxd_server_config_file, self.template_folder, self.dist_oxd_server_config_folder)
         if self.os_type == Distribution.Ubuntu and self.os_version in ['16']:
             self.run([self.cmd_service, self.oxd_server_service, 'start'])
@@ -263,6 +260,26 @@ class KongSetup(object):
             self.run([self.cmd_systemctl, 'start', self.oxd_server_service])
         if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '7':
             self.run([self.cmd_systemctl, 'start', self.oxd_server_service])
+
+    def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
+        # Enable service autoload on Gluu-Server startup
+        if self.os_type in [Distribution.CENTOS, Distribution.RHEL]:
+            if self.os_initdaemon == 'systemd':
+                self.run([self.cmd_systemctl, action, serviceName])
+            else:
+                self.run(["/sbin/chkconfig", serviceName, "on" if action=='enable' else 'off'])
+
+        elif self.os_type+self.os_version in ('ubuntu18','debian9'):
+            self.run([self.cmd_systemctl, action, serviceName])
+
+        elif self.os_type in [Distribution.Ubuntu, Distribution.Debian]:
+            cmd_list = ["/usr/sbin/update-rc.d", serviceName, 'defaults']
+
+            if startSequence and stopSequence:
+                cmd_list.append(str(startSequence))
+                cmd_list.append(str(stopSequence))
+
+            self.run(cmd_list)
 
     def detect_host_name(self):
         detected_host_name = None
@@ -426,7 +443,7 @@ class KongSetup(object):
         jre_archive = 'server-jre-8u%s-linux-x64.tar.gz' % self.jre_version
 
         try:
-            self.log_it("Extracting %s into /opt/" % jre_archive)
+            self.log_it("Extracting %s into %s/%s" % (jre_archive, self.gg_dist_app_folder, jre_archive))
             self.run(['tar', '-xzf', '%s/%s' % (self.gg_dist_app_folder, jre_archive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.log_it("Error encountered while extracting archive %s" % jre_archive)
@@ -436,8 +453,8 @@ class KongSetup(object):
         self.run([self.cmd_chmod, '-R', '755', '%s/bin/' % self.jre_destination_path])
         with open('/etc/environment', 'a') as f:
             f.write('JAVA_HOME=/opt/jre')
-        if self.os_type == [Distribution.Ubuntu, Distribution.Debian]:
-            self.run([self.cmd_update_alternatives, '--install', '/usr/bin/java', 'java', '%s/bin/java' % (self.jre_home), '1'], shell=True)
+        if self.os_type in [Distribution.Ubuntu, Distribution.Debian]:
+            self.run([self.cmd_update_alternatives, '--install', '/usr/bin/java', 'java', '%s/bin/java' % (self.jre_home), '1'])
         elif self.os_type in [Distribution.CENTOS, Distribution.RHEL]:
             self.run([self.cmd_alternatives, '--install', '/usr/bin/java', 'java', '%s/bin/java' % (self.jre_home), '1'])
 
@@ -571,19 +588,19 @@ make sure it's available from this server."""
         install_kong_cmd = []
 
         if self.os_type == Distribution.Ubuntu and self.os_version == '18':
-            kong_package_file = "%s/%s" % (self.tmp_folder, self.ubuntu18_kong_file)
+            kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.ubuntu18_kong_file)
             install_kong_cmd = [self.cmd_dpkg, '--install', kong_package_file]
 
         if self.os_type == Distribution.Ubuntu and self.os_version == '16':
-            kong_package_file = "%s/%s" % (self.tmp_folder, self.ubuntu16_kong_file)
+            kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.ubuntu16_kong_file)
             install_kong_cmd = [self.cmd_dpkg, '--install', kong_package_file]
 
         if self.os_type == Distribution.CENTOS and self.os_version == '7':
-            kong_package_file = "%s/%s" % (self.tmp_folder, self.centos7_kong_file)
+            kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.centos7_kong_file)
             install_kong_cmd = [self.cmd_rpm, '--install', '--verbose', '--hash', kong_package_file]
 
         if self.os_type == Distribution.RHEL and self.os_version == '7':
-            kong_package_file = "%s/%s" % (self.tmp_folder, self.rhel7_kong_file)
+            kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.rhel7_kong_file)
             install_kong_cmd = [self.cmd_rpm, '--install', '--verbose', '--hash', kong_package_file]
 
         if not os.path.exists(kong_package_file):
