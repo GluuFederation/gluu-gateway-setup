@@ -101,8 +101,6 @@ fi
 /lib/systemd/system/kong.service
 /lib/systemd/system/konga.service
 /lib/systemd/system/gluu-gateway.service
-/tmp/%OXD_SERVER%
-/tmp/%KONG%
 
 %changelog
 * Wed Jan 15 2020 Davit Nikoghosyan <davit@gluu.org> - %VERSION%-1
