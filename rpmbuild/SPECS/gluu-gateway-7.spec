@@ -28,8 +28,6 @@ cp -a %{SOURCE3} %{buildroot}/lib/systemd/system/konga.service
 cp -a opt/gluu-gateway %{buildroot}/opt/
 cp -a opt/gluu-gateway-ui %{buildroot}/opt/
 cp -a opt/gluu-gateway-setup %{buildroot}/opt/
-cp -a tmp/%OXD_SERVER% %{buildroot}/tmp/
-cp -a tmp/%KONG% %{buildroot}/tmp/
 
 %pre
 mkdir -p /opt/gluu-gateway-ui/config/locales
