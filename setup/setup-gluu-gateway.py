@@ -235,6 +235,7 @@ class KongSetup(object):
         self.log_it("Installing oxd server...")
         oxd_root = '/opt/oxd-server/'
         self.run(['tar', '-zxf', "%s/oxd-server.tgz" % self.gg_dist_app_folder, '-C', '/opt'])
+        self.run(['/usr/sbin/useradd --system --create-home --user-group --shell /bin/bash --home-dir /home/jetty jetty'])
 
         service_file = os.path.join(oxd_root, 'oxd-server.service')
         if os.path.exists(service_file):
@@ -247,7 +248,11 @@ class KongSetup(object):
             self.run(['update-rc.d', 'oxd-server', 'defaults'])
 
         self.run([self.cmd_cp, os.path.join(oxd_root, 'oxd-server-default'),  '/etc/default/oxd-server'])
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', oxd_root])
         self.run([self.cmd_mkdir, '/var/log/oxd-server'])
+        self.run([self.cmd_touch, '/var/log/oxd-server/oxd-server.log'])
+        self.run([self.cmd_touch, '/var/log/oxd-server/start.log'])
+        self.run([self.cmd_chown,'-R', 'jetty:jetty', '/var/log/oxd-server'])
 
         for fn in glob.glob(os.path.join(oxd_root,'bin/*')):
             self.run([self.cmd_chmod, '+x', fn])
