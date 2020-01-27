@@ -235,7 +235,7 @@ class KongSetup(object):
         self.log_it("Installing oxd server...")
         oxd_root = '/opt/oxd-server/'
         self.run(['tar', '-zxf', "%s/oxd-server.tgz" % self.gg_dist_app_folder, '-C', '/opt'])
-        self.run(['/usr/sbin/useradd --system --create-home --user-group --shell /bin/bash --home-dir /home/jetty jetty'])
+        self.run(['/usr/sbin/useradd', '--system', '--create-home', '--user-group', '--shell', '/bin/bash', '--home-dir', '/home/jetty', 'jetty'])
 
         service_file = os.path.join(oxd_root, 'oxd-server.service')
         if os.path.exists(service_file):
