@@ -110,7 +110,7 @@ class KongSetup(object):
         self.gluu_gateway_ui_client_secret = ''
         self.gluu_gateway_ui_oxd_web = ''
         self.gluu_gateway_ui_kong_admin_web_url = 'http://localhost:%s' % self.kong_admin_listen_port
-        self.gluu_gateway_ui_oxd_version = '4.0'
+        self.gluu_gateway_ui_oxd_version = '4.1'
         self.gg_version = '4.1'
         self.postgres_version = '10.x'
 
