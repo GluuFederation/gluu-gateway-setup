@@ -9,7 +9,6 @@ if [ -f /etc/init.d/gluu-gateway ]; then
 fi
 if [ -f /lib/systemd/system/gluu-gateway.service ]; then
      systemctl stop konga > /dev/null 2>&1
-     systemctl stop kong > /dev/null 2>&1
      systemctl stop oxd-server > /dev/null 2>&1
 fi
 if [ -f /opt/gluu-gateway-setup/setup-gluu-gateway.py ]; then
