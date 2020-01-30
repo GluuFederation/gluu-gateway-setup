@@ -22,7 +22,6 @@ if [ "$1" = purge ]; then
     fi  
     if [ -f /lib/systemd/system/gluu-gateway.service ]; then
         rm -rf /lib/systemd/system/gluu-gateway.service > /dev/null 2>&1
-	rm -rf /lib/systemd/system/kong.service > /dev/null 2>&1
 	rm -rf /lib/systemd/system/konga.service > /dev/null 2>&1
     fi
     service postgresql start
