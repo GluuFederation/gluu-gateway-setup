@@ -6,7 +6,6 @@ License:	Apache-2.0
 URL:		https://www.gluu.org
 Source0:	gluu-gateway-4.1.0.tar.gz
 Source1:	gluu-gateway.service
-Source2:	kong.service
 Source3:	konga.service
 BuildArch:      noarch
 Requires:	postgresql10, postgresql10-server, nodejs, lua-cjson, unzip, python-requests, ca-certificates
@@ -23,7 +22,6 @@ mkdir -p %{buildroot}/tmp/
 mkdir -p %{buildroot}/opt/
 mkdir -p %{buildroot}/lib/systemd/system/
 cp -a %{SOURCE1} %{buildroot}/lib/systemd/system/gluu-gateway.service
-cp -a %{SOURCE2} %{buildroot}/lib/systemd/system/kong.service
 cp -a %{SOURCE3} %{buildroot}/lib/systemd/system/konga.service
 cp -a opt/gluu-gateway %{buildroot}/opt/
 cp -a opt/gluu-gateway-ui %{buildroot}/opt/
@@ -34,8 +32,6 @@ mkdir -p /opt/gluu-gateway-ui/config/locales
 mkdir -p /opt/gluu-gateway-ui/config/env
 
 %post
-systemctl enable kong > /dev/null 2>&1
-systemctl stop kong > /dev/null 2>&1
 systemctl enable konga > /dev/null 2>&1
 systemctl stop konga > /dev/null 2>&1
 systemctl enable gluu-gateway > /dev/null 2>&1
@@ -98,7 +94,6 @@ fi
 %config(missingok, noreplace) /opt/gluu-gateway-ui/config/locales/_README.md
 %config(missingok, noreplace) /opt/gluu-gateway-ui/config/env/development.js
 %config(missingok, noreplace) /opt/gluu-gateway-ui/config/env/production.js
-/lib/systemd/system/kong.service
 /lib/systemd/system/konga.service
 /lib/systemd/system/gluu-gateway.service
 
