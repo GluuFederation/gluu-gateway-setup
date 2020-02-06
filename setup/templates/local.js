@@ -75,4 +75,5 @@ module.exports = {
   ggVersion: process.env.GG_VERSION || '%(gg_version)s',
   postgresVersion: process.env.POSTGRES_VERSION || '%(postgres_version)s',
   explicitHost: process.env.EXPLICIT_HOST || 'localhost',
+  ggUIRedirectURLHost: process.env.GG_UI_REDIRECT_URL_HOST || 'localhost',
 };
