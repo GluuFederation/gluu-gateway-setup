@@ -645,11 +645,6 @@ make sure it's available from this server."""
             self.log_it("Error running command : %s" % " ".join(args), True)
             self.log_it(traceback.format_exc(), True)
 
-    def start_kong(self):
-        self.log_it("Starting kong")
-        self.run([self.cmd_kong, "stop"])
-        self.run([self.cmd_kong, "start"])
-
     def migrate_kong(self):
         self.run([self.cmd_kong, "migrations", "bootstrap"])
 
@@ -882,7 +877,6 @@ SOFTWARE.
                 kongSetup.install_config_kong()
                 kongSetup.install_plugins()
                 kongSetup.migrate_kong()
-                kongSetup.start_kong()
                 kongSetup.configure_install_oxd()
                 kongSetup.config_gluu_gateway_ui()
                 kongSetup.start_gg_service()
