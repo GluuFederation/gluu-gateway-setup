@@ -647,8 +647,8 @@ make sure it's available from this server."""
 
     def start_kong(self):
         self.log_it("Starting kong")
-        # self.run([self.cmd_kong, "stop"])
-        # self.run([self.cmd_kong, "start"])
+        self.run([self.cmd_kong, "stop"])
+        self.run([self.cmd_kong, "start"])
 
     def migrate_kong(self):
         self.run([self.cmd_kong, "migrations", "bootstrap"])
