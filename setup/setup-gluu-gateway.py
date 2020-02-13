@@ -436,6 +436,8 @@ class KongSetup(object):
         # Disable kong stock auth plugins
         for plugin in self.disable_plugin_list:
             self.run([self.cmd_cp, '-R', '%s/disable-plugin-handler.lua' % self.gg_comman_folder, "%s/%s/handler.lua" % (self.dist_kong_plugins_folder, plugin)])
+            if plugin == "ldap-auth":
+                continue
             self.run([self.cmd_rm, '-rf', '%s/%s/migrations' % (self.dist_kong_plugins_folder, plugin)])
             self.run([self.cmd_rm, '-R', '%s/%s/daos.lua' % (self.dist_kong_plugins_folder, plugin)])
 
@@ -805,37 +807,7 @@ if __name__ == "__main__":
     kongSetup.check_root()
     try:
         if kongSetup.is_prompt:
-            msg = """
------------------------------------------------------
-The Gluu Support License (GLUU-SUPPORT)
-
-Copyright (c) 2019 Gluu
-
-Permission is hereby granted to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-The end-user person or organization using this software has an active support 
-subscription for this software with either Gluu or one of Gluu's OEM partners after using the 
-software for more than 30 days.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
------------------------------------------------------
-            """
-            print msg
-            kongSetup.license = kongSetup.make_boolean(kongSetup.get_prompt('Do you acknowledge that use of the Gluu Gateway is under the Stepped-Up Support License? (y|N)', 'N'))
+            kongSetup.license = kongSetup.make_boolean(kongSetup.get_prompt('Do you acknowledge that use of the Gluu Gateway is under the Apache 2.0 License? (y|N)', 'N'))
             print ""
         if kongSetup.license:
             kongSetup.make_folders()
@@ -880,7 +852,7 @@ SOFTWARE.
                 kongSetup.configure_install_oxd()
                 kongSetup.config_gluu_gateway_ui()
                 kongSetup.start_gg_service()
-                print "\n\nGluu Gateway configuration successful!!! https://localhost:%s\n\n" % kongSetup.gluu_gateway_ui_port
+                print "\n\nGluu Gateway configuration is successful!!! https://localhost:%s\n\n" % kongSetup.gluu_gateway_ui_port
             else:
                 print "Exit"
         else:
