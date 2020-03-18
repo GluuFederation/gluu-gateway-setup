@@ -5,6 +5,8 @@ if [ -f /etc/init.d/gluu-gateway ]; then
     update-rc.d gluu-gateway remove > /dev/null 2>&1
 fi
 rm -rf /opt/gluu-gateway > /dev/null 2>&1
+rm -rf /opt/gluu-gateway-ui > /dev/null 2>&1
+rm -rf /opt/gluu-gateway-setup > /dev/null 2>&1
 rm -rf /opt/jdk1.8.0_162 > /dev/null 2>&1
 rm -rf /opt/jre > /dev/null 2>&1
 
@@ -20,7 +22,6 @@ if [ "$1" = purge ]; then
     fi  
     if [ -f /lib/systemd/system/gluu-gateway.service ]; then
         rm -rf /lib/systemd/system/gluu-gateway.service > /dev/null 2>&1
-	rm -rf /lib/systemd/system/kong.service > /dev/null 2>&1
 	rm -rf /lib/systemd/system/konga.service > /dev/null 2>&1
     fi
     service postgresql start

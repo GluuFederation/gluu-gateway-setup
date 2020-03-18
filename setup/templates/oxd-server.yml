@@ -53,7 +53,7 @@ logging:
       maxFileSize: 10MB
 
 defaultSiteConfig:
-  op_host: '%(konga_op_host)s'
+  op_host: '%(gluu_gateway_ui_op_host)s'
   op_discovery_path: ''
   response_types: ['code']
   grant_type: ['authorization_code']

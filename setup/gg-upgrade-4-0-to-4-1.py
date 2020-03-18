@@ -57,6 +57,7 @@ class KongSetup(object):
         self.cmd_service = 'service'
         self.cmd_systemctl = os.popen('which systemctl').read().strip()
         self.cmd_rpm = '/bin/rpm'
+        self.cmd_echo = '/bin/echo'
         self.cmd_dpkg = '/usr/bin/dpkg'
         self.cmd_kong = '/usr/local/bin/kong'
 
@@ -165,6 +166,10 @@ class KongSetup(object):
         self.rhel7_kong_file = "kong-2.0.1.rhel7.amd64.rpm"
         self.ubuntu18_kong_file = "kong-2.0.1.bionic.amd64.deb"
 
+        # db names
+        self.dist_konga_db_file = "%s/templates/konga.sql" % self.dist_gluu_gateway_setup_folder
+        self.dist_kong_db_file = "%s/templates/kong.sql" % self.dist_gluu_gateway_setup_folder
+
     def init_parameters_from_json_argument(self):
         if len(sys.argv) > 1:
             self.is_prompt = False
@@ -190,6 +195,7 @@ class KongSetup(object):
                 self.gluu_gateway_ui_client_secret = data['gluu_gateway_ui_client_secret']
 
     def configure_postgres(self):
+        print "Configuring postgres..."
         self.log_it('Configuring postgres...')
         print 'Configuring postgres...'
         if self.os_type == Distribution.Ubuntu:
@@ -197,30 +203,16 @@ class KongSetup(object):
             os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
-        if self.os_type == Distribution.Debian:
-            self.run(['/etc/init.d/postgresql', 'start'])
-            os.system('/bin/su -s /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\"" postgres' % self.pg_pwd)
-            os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
-            os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
+            os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_konga_db_file)
+            os.system('sudo -iu postgres /bin/bash -c "psql kong < %s"' % self.dist_kong_db_file)
         if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '7':
             # Initialize PostgreSQL first time
-            self.run([self.cmd_ln, '/usr/lib/systemd/system/postgresql-10.service', '/usr/lib/systemd/system/postgresql.service'])
-            self.run(['/usr/pgsql-10/bin/postgresql-10-setup', 'initdb'])
-            self.render_template_in_out(self.dist_pg_hba_config_file, self.template_folder, self.dist_pg_hba_config_path)
-            self.run([self.cmd_systemctl, 'enable', 'postgresql'])
             self.run([self.cmd_systemctl, 'start', 'postgresql'])
             os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
-        if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '6':
-            # Initialize PostgreSQL first time
-            self.run([self.cmd_ln, '/etc/init.d/postgresql-10', '/etc/init.d/postgresql'])
-            self.run([self.cmd_service, 'postgresql-10', 'initdb'])
-            self.render_template_in_out(self.dist_pg_hba_config_file, self.template_folder, self.dist_pg_hba_config_path)
-            self.run([self.cmd_service, 'postgresql', 'start'])
-            os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
-            os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
-            os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
+            os.system('sudo -iu postgres /bin/bash -c "psql konga < %s"' % self.dist_konga_db_file)
+            os.system('sudo -iu postgres /bin/bash -c "psql kong < %s"' % self.dist_kong_db_file)
 
     def configure_install_oxd(self):
         if not self.install_oxd:
@@ -228,8 +220,11 @@ class KongSetup(object):
             return
 
         # Install OXD
+        print "Installing oxd server..."
         self.log_it("Installing oxd server...")
+
         oxd_root = '/opt/oxd-server/'
+        # take backup of oxd_db.mv.db
         self.run(['tar', '-zxf', "%s/oxd-server.tgz" % self.gg_dist_app_folder, '-C', '/opt'])
         self.run(['/usr/sbin/useradd', '--system', '--create-home', '--user-group', '--shell', '/bin/bash', '--home-dir', '/home/jetty', 'jetty'])
 
@@ -246,6 +241,8 @@ class KongSetup(object):
         self.run([self.cmd_cp, os.path.join(oxd_root, 'oxd-server-default'),  '/etc/default/oxd-server'])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', oxd_root])
         self.run([self.cmd_mkdir, '/var/log/oxd-server'])
+        self.run([self.cmd_mkdir, '%s/data' % oxd_root])
+        self.run([self.cmd_cp, '%s/templates/oxd_db.mv.db' % self.dist_gluu_gateway_setup_folder, '%s/data/oxd_db.mv.db' % oxd_root])
         self.run([self.cmd_touch, '/var/log/oxd-server/oxd-server.log'])
         self.run([self.cmd_touch, '/var/log/oxd-server/start.log'])
         self.run([self.cmd_chown,'-R', 'jetty:jetty', '/var/log/oxd-server'])
@@ -365,8 +362,8 @@ class KongSetup(object):
         try:
             test_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             detected_ip = [(test_socket.connect(('8.8.8.8', 80)),
-                           test_socket.getsockname()[0],
-                           test_socket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
+                            test_socket.getsockname()[0],
+                            test_socket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
         except:
             self.log_it("No detected IP address", True)
             self.log_it(traceback.format_exc(), True)
@@ -400,7 +397,8 @@ class KongSetup(object):
             return None
 
     def install_plugins(self):
-        self.log_it('Installing lua packages...')
+        print "Installing kong plugins..."
+        self.log_it('Installing kong plugins...')
 
         # json-logic-lua
         self.run([self.cmd_mkdir, '-p', '%s/rucciva' % self.dist_lua_folder])
@@ -586,7 +584,10 @@ make sure it's available from this server."""
             self.gluu_gateway_ui_client_secret = self.get_prompt('Client Secret')
 
     def install_config_kong(self):
-        # Install OXD
+        # Install Kong
+        print "Installing Kong"
+        self.log_it("Installing Kong")
+
         kong_package_file = ''
         install_kong_cmd = []
 
@@ -648,9 +649,13 @@ make sure it's available from this server."""
             self.log_it(traceback.format_exc(), True)
 
     def migrate_kong(self):
-        self.run([self.cmd_kong, "migrations", "bootstrap"])
+        print "Migrating kong db..."
+        self.log_it("Migrating kong db...")
+        self.run([self.cmd_kong, "migrations", "up"])
+        self.run([self.cmd_kong, "migrations", "finish"])
 
     def start_gg_service(self):
+        print "Starting %s..." % self.gg_service
         self.log_it("Starting %s..." % self.gg_service)
         if self.os_type == Distribution.Ubuntu and self.os_version in ['16']:
             self.run([self.cmd_service, self.oxd_server_service, 'stop'])

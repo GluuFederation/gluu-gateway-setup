@@ -6,7 +6,6 @@ luac.out
 
 # luarocks build files
 *.src.rock
-*.tar.gz
 
 # Object files
 *.o

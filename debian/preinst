@@ -1,5 +1,3 @@
 #!/bin/bash
-mkdir -p /opt/gluu-gateway/konga/config/locales
-mkdir -p /opt/gluu-gateway/konga/config/env
-mkdir -p /opt/gluu-gateway/kong
+mkdir -p /opt/gluu-gateway-setup
 exit 0
