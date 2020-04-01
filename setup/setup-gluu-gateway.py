@@ -222,46 +222,6 @@ class KongSetup(object):
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
 
-    def configure_install_oxd(self):
-        if not self.install_oxd:
-            self.log_it("Skipping OXD Server installation, install_oxd: false")
-            return
-
-        # Install OXD
-        self.log_it("Installing oxd server...")
-        oxd_root = '/opt/oxd-server/'
-        self.run(['tar', '-zxf', "%s/oxd-server.tgz" % self.gg_dist_app_folder, '-C', '/opt'])
-        self.run(['/usr/sbin/useradd', '--system', '--create-home', '--user-group', '--shell', '/bin/bash', '--home-dir', '/home/jetty', 'jetty'])
-
-        service_file = os.path.join(oxd_root, 'oxd-server.service')
-        if os.path.exists(service_file):
-            self.run([self.cmd_cp, service_file, '/lib/systemd/system'])
-        else:
-            service_file = os.path.join(oxd_root, 'oxd-server.init.d')
-            target_file = '/etc/init.d/oxd-server'
-            self.run([self.cmd_cp, service_file, target_file])
-            self.run([self.cmd_chmod, '+x', target_file])
-            self.run(['update-rc.d', 'oxd-server', 'defaults'])
-
-        self.run([self.cmd_cp, os.path.join(oxd_root, 'oxd-server-default'),  '/etc/default/oxd-server'])
-        self.run([self.cmd_chown, '-R', 'jetty:jetty', oxd_root])
-        self.run([self.cmd_mkdir, '/var/log/oxd-server'])
-        self.run([self.cmd_touch, '/var/log/oxd-server/oxd-server.log'])
-        self.run([self.cmd_touch, '/var/log/oxd-server/start.log'])
-        self.run([self.cmd_chown,'-R', 'jetty:jetty', '/var/log/oxd-server'])
-
-        for fn in glob.glob(os.path.join(oxd_root,'bin/*')):
-            self.run([self.cmd_chmod, '+x', fn])
-
-        self.enable_service_at_start('oxd-server')
-        self.render_template_in_out(self.dist_oxd_server_config_file, self.template_folder, self.dist_oxd_server_config_folder)
-        if self.os_type == Distribution.Ubuntu and self.os_version in ['16']:
-            self.run([self.cmd_service, self.oxd_server_service, 'start'])
-        if self.os_type == Distribution.Ubuntu and self.os_version in ['18']:
-            self.run([self.cmd_systemctl, 'start', self.oxd_server_service])
-        if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '7':
-            self.run([self.cmd_systemctl, 'start', self.oxd_server_service])
-
     def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
         # Enable service autoload on Gluu-Server startup
         if self.os_type in [Distribution.CENTOS, Distribution.RHEL]:
@@ -567,17 +527,12 @@ Postgres DB, then enter existing password, otherwise enter new password: """
 
         # Konga Configuration
         msg = """
-The next few questions are used to configure Konga.
+The next few questions are used to configure GG UI(Konga).
 If you are connecting to an existing oxd server from other the network,
 make sure it's available from this server."""
         print msg
 
-        self.install_oxd = self.make_boolean(self.get_prompt("Install OXD Server? (y - install, n - skip)", 'y'))
-        if self.install_oxd:
-            self.gluu_gateway_ui_oxd_web = self.get_prompt('OXD Server URL', 'https://%s:8443' % self.host_name)
-        else:
-            self.gluu_gateway_ui_oxd_web = self.get_prompt('Enter your existing OXD server URL', 'https://%s:8443' % self.host_name)
-
+        self.gluu_gateway_ui_oxd_web = self.get_prompt('Enter your OXD server URL')
         self.generate_client = self.make_boolean(self.get_prompt("Generate client credentials to call oxd-server API's? (y - generate, n - enter existing client credentials manually)", 'y'))
 
         if not self.generate_client:
@@ -820,7 +775,6 @@ if __name__ == "__main__":
                   + 'City'.ljust(30) + kongSetup.city.rjust(35) + "\n" \
                   + 'State'.ljust(30) + kongSetup.state.rjust(35) + "\n" \
                   + 'Country'.ljust(30) + kongSetup.country_code.rjust(35) + "\n" \
-                  + 'Install OXD?'.ljust(30) + repr(kongSetup.install_oxd).rjust(35) + "\n" \
                   + 'OXD Server URL'.ljust(30) + kongSetup.gluu_gateway_ui_oxd_web.rjust(35) + "\n" \
                   + 'OP Host'.ljust(30) + kongSetup.gluu_gateway_ui_op_host.rjust(35) + "\n"
 
@@ -849,7 +803,6 @@ if __name__ == "__main__":
                 kongSetup.install_config_kong()
                 kongSetup.install_plugins()
                 kongSetup.migrate_kong()
-                kongSetup.configure_install_oxd()
                 kongSetup.config_gluu_gateway_ui()
                 kongSetup.start_gg_service()
                 print "\n\nGluu Gateway configuration is successful!!! https://localhost:%s\n\n" % kongSetup.gluu_gateway_ui_port
