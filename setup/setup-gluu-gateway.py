@@ -136,6 +136,10 @@ class KongSetup(object):
         self.os_version = None
         self.os_initdaemon = None
 
+        # log-rotate kong config file
+        self.dist_kong_log_rotate_config_path = '/etc/logrotate.d'
+        self.dist_kong_log_rotate_config_file = '%s/kong' % self.dist_kong_log_rotate_config_path
+
         # PostgreSQL config file path
         self.dist_pg_hba_config_path = '/var/lib/pgsql/10/data'
         self.dist_pg_hba_config_file = '%s/pg_hba.conf' % self.dist_pg_hba_config_path
@@ -745,6 +749,10 @@ make sure it's available from this server."""
         self.log_it(message, True)
         sys.exit()
 
+    def configure_kong_rotate(self):
+        self.log_it("Configuring log rotate for kong")
+        self.render_template_in_out(self.dist_kong_log_rotate_config_file, self.template_folder, self.dist_kong_log_rotate_config_path)
+
     def check_root(self):
         try:
             user = pwd.getpwuid(os.getuid()).pw_name
@@ -799,6 +807,7 @@ if __name__ == "__main__":
                 kongSetup.disable_warnings()
                 kongSetup.gen_kong_ssl_certificate()
                 kongSetup.install_jre()
+                kongSetup.configure_kong_rotate()
                 kongSetup.configure_postgres()
                 kongSetup.install_config_kong()
                 kongSetup.install_plugins()
