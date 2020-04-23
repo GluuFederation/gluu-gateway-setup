@@ -6,5 +6,5 @@ setup/* opt/gluu-gateway-setup/
 gg_bower_components.tar.gz opt/gluu-gateway/dist
 gg_node_modules.tar.gz opt/gluu-gateway/dist
 server-jre-8u162-linux-x64.tar.gz opt/gluu-gateway/dist/app
-oxd-server.tgz opt/gluu-gateway/dist/app
+#oxd-server.tgz opt/gluu-gateway/dist/app
 %KONG% opt/gluu-gateway/dist/app
