@@ -1,14 +1,16 @@
 #!/bin/sh
 set -e
 
-if [ -f /etc/init.d/gluu-gateway ]; then
-    update-rc.d gluu-gateway remove > /dev/null 2>&1
-fi
-rm -rf /opt/gluu-gateway > /dev/null 2>&1
-rm -rf /opt/gluu-gateway-ui > /dev/null 2>&1
-rm -rf /opt/gluu-gateway-setup > /dev/null 2>&1
-rm -rf /opt/jdk1.8.0_162 > /dev/null 2>&1
-rm -rf /opt/jre > /dev/null 2>&1
+if [ "$1" != upgrade ]; then
+    if [ -f /etc/init.d/gluu-gateway ]; then
+        update-rc.d gluu-gateway remove > /dev/null 2>&1
+    fi
+    rm -rf /opt/gluu-gateway > /dev/null 2>&1
+    rm -rf /opt/gluu-gateway-ui > /dev/null 2>&1
+    rm -rf /opt/gluu-gateway-setup > /dev/null 2>&1
+    rm -rf /opt/jdk1.8.0_162 > /dev/null 2>&1
+    rm -rf /opt/jre > /dev/null 2>&1
+fi    
 
 if [ "$1" = purge ]; then
     if [ -f /etc/init.d/gluu-gateway ]; then
