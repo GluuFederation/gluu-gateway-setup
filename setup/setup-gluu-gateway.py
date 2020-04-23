@@ -532,11 +532,11 @@ Postgres DB, then enter existing password, otherwise enter new password: """
         # Konga Configuration
         msg = """
 The next few questions are used to configure GG UI(Konga).
-If you are connecting to an existing oxd server from other the network,
+You are connecting to an existing oxd server from other the network,
 make sure it's available from this server."""
         print msg
 
-        self.gluu_gateway_ui_oxd_web = self.get_prompt('Enter your OXD server URL')
+        self.gluu_gateway_ui_oxd_web = self.get_prompt('Enter OXD server URL')
         self.generate_client = self.make_boolean(self.get_prompt("Generate client credentials to call oxd-server API's? (y - generate, n - enter existing client credentials manually)", 'y'))
 
         if not self.generate_client:
