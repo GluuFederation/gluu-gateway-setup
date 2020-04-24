@@ -115,7 +115,6 @@ class KongSetup(object):
         self.postgres_version = '10.x'
 
         # oxd licence configuration
-        self.install_oxd = True
         self.generate_client = True
         self.gluu_gateway_ui_redirect_uri = 'localhost'
 
@@ -183,7 +182,6 @@ class KongSetup(object):
             self.admin_email = data['admin_email']
             self.pg_pwd = data['pg_pwd']
             self.gluu_gateway_ui_redirect_uri = data['gluu_gateway_ui_redirect_uri']
-            self.install_oxd = data['install_oxd']
             self.gluu_gateway_ui_op_host = 'https://' + data['gluu_gateway_ui_op_host']
             self.gluu_gateway_ui_oxd_web = data['gluu_gateway_ui_oxd_web']
             self.generate_client = data['generate_client']
