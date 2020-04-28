@@ -94,10 +94,6 @@ function displayLogs {
     echo ""
     cat /var/log/konga.log
     echo ""
-    echo "--------------------------------/var/log/oxd-server/oxd-server.log----------------------------------------"
-    echo ""
-    cat /var/log/oxd-server/oxd-server.log
-    echo ""
     echo "----------------------/opt/gluu-gateway/setup/gluu-gateway-setup_error.log-----------------------------------"
     echo ""
     cat /opt/gluu-gateway-setup/gluu-gateway-setup_error.log
@@ -143,20 +139,9 @@ function checkKong {
         exit 1
     fi
 }
-
-function checkOxd {
-    if lsof -Pi :8443 -sTCP:LISTEN -t >/dev/null ; then
-        echo "OXD is running"
-    else
-        echo "ERROR: OXD is not running"
-        exit 1
-    fi
-}
-
 function checkServices {
     checkKonga
     checkKong
-    checkOxd
 }
 
 createSwap

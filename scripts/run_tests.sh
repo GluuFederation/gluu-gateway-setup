@@ -10,7 +10,7 @@ cp jq /usr/bin
 # Init
 HOST=$2
 OP_HOST=$3
-OXD_HOST='localhost'
+OXD_HOST=$4
 KONG_PROXY_HOST=$2
 KONG_ADMIN_HOST='localhost'
 OXD_PORT=8443
