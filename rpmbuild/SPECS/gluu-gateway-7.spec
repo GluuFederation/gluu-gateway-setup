@@ -4,7 +4,7 @@ Release:	%RELEASE%
 Summary:	OAuth protected API
 License:	Apache-2.0
 URL:		https://www.gluu.org
-Source0:	gluu-gateway-4.1.0.tar.gz
+Source0:	gluu-gateway-4.2.0.tar.gz
 Source1:	gluu-gateway.service
 Source3:	konga.service
 BuildArch:      noarch
