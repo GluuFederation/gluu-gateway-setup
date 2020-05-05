@@ -8,7 +8,7 @@ Source0:	gluu-gateway-4.1.0.tar.gz
 Source1:	gluu-gateway.service
 Source3:	konga.service
 BuildArch:      noarch
-Requires:	postgresql10, postgresql10-server, nodejs, lua-cjson, unzip, python-requests, ca-certificates
+Requires:	postgresql10, postgresql10-server, nodejs, lua-cjson, unzip, python-requests, ca-certificates, logrotate
 
 %description
 The Gluu Gateway is a package which can be used to quickly
@@ -36,7 +36,6 @@ systemctl enable konga > /dev/null 2>&1
 systemctl stop konga > /dev/null 2>&1
 systemctl enable gluu-gateway > /dev/null 2>&1
 systemctl stop gluu-gateway > /dev/null 2>&1
-systemctl stop oxd-server > /dev/null 2>&1
 chmod +x /opt/gluu-gateway-setup/setup-gluu-gateway.py > /dev/null 2>&1
 if [ `ulimit -n` -le 4095 ]; then
 if ! cat /etc/security/limits.conf | grep "* soft nofile 4096" > /dev/null 2>&1; then
