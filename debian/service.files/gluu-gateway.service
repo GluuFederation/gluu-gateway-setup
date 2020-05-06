@@ -1,12 +1,12 @@
 [Unit]
 Description=Gluu-Gateway server daemon
-After=network.target postgresql.service konga.service kong.service oxd-server.service
-Requires=postgresql.service konga.service kong.service oxd-server.service
+After=network.target postgresql.service konga.service kong.service
+Requires=postgresql.service konga.service kong.service 
 
 [Service]
 Type=forking
 ExecStart=/bin/bash -c ''
-ExecStop=/bin/bash -c 'systemctl stop kong && /opt/oxd-server/bin/oxd-server.sh stop || /bin/kill -9 `cat /var/run/oxd-server.pid`'
+ExecStop=/bin/bash -c 'systemctl stop kong'
 RemainAfterExit=yes
 
 [Install]
