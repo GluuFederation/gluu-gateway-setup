@@ -618,7 +618,6 @@ make sure it's available from this server."""
             self.run([self.cmd_systemctl, 'start', self.gg_service])
             self.run([self.cmd_systemctl, 'enable', self.gg_service])
         elif self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '7':
-            self.run(['ls', '-l', '/usr/lib/systemd/system/gluu-gateway.service'])
             self.run([self.cmd_systemctl, 'stop', self.gg_service])
             self.run([self.cmd_systemctl, 'start', self.gg_service])
             self.run([self.cmd_systemctl, 'enable', self.gg_service])
