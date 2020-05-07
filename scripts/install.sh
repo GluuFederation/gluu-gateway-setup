@@ -110,7 +110,6 @@ function displayLogs {
     echo ""
     service kong status
     service konga status
-    service oxd-server status
 }
 
 function checkKonga {
