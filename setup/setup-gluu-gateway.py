@@ -137,7 +137,7 @@ class KongSetup(object):
 
         # log-rotate kong config file
         self.dist_kong_log_rotate_config_path = '/etc/logrotate.d'
-        self.kong_log_rotate_config_file = '/kong_logrotate'
+        self.kong_log_rotate_config_file = 'kong_logrotate'
 
         # PostgreSQL config file path
         self.dist_pg_hba_config_path = '/var/lib/pgsql/10/data'
