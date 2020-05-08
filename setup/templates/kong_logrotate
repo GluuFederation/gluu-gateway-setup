@@ -1,6 +1,6 @@
 /usr/local/kong/logs/*.log
 {
-create 0644 kong kong
+create 0644 root root
 daily
 rotate 10
 missingok

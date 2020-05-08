@@ -137,7 +137,7 @@ class KongSetup(object):
 
         # log-rotate kong config file
         self.dist_kong_log_rotate_config_path = '/etc/logrotate.d'
-        self.dist_kong_log_rotate_config_file = '%s/kong' % self.dist_kong_log_rotate_config_path
+        self.kong_log_rotate_config_file = '/kong_logrotate'
 
         # PostgreSQL config file path
         self.dist_pg_hba_config_path = '/var/lib/pgsql/10/data'
@@ -746,7 +746,7 @@ make sure it's available from this server."""
 
     def configure_kong_rotate(self):
         self.log_it("Configuring log rotate for kong")
-        self.render_template_in_out(self.dist_kong_log_rotate_config_file, self.template_folder, self.dist_kong_log_rotate_config_path)
+        self.run([self.cmd_cp, '%s/%s' % (self.template_folder, self.kong_log_rotate_config_file), "%s/kong" % self.dist_kong_log_rotate_config_path])
 
     def check_root(self):
         try:
