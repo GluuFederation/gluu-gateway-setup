@@ -29,7 +29,7 @@ function test_oauth_auth_and_pep() {
     echo "test_oauth_auth_and_pep"
     echo "=================================================="
     # Create service in kong
-    SERVICE_RESPONSE=`curl -k -X POST http://$KONG_ADMIN_HOST:8001/services/  -H 'Content-Type: application/json'  -d '{"name":"jsonplaceholder","url":"https://jsonplaceholder.typicode.com"}'`
+    SERVICE_RESPONSE=`curl -k -X POST http://$KONG_ADMIN_HOST:8001/services/  -H 'Content-Type: application/json'  -d '{"name":"jsonplaceholder","url":"http://localhost:3000"}'`
 
     SERVICE_ID=`echo $SERVICE_RESPONSE | jq -r ".id"`
     echo "SERVICE_ID " .. $SERVICE_ID
@@ -109,7 +109,7 @@ function test_uma_auth_and_pep() {
     echo "test_uma_auth_and_pep"
     echo "=================================================="
 
-    SERVICE_RESPONSE=`curl -k -X POST http://$KONG_ADMIN_HOST:8001/services/  -H 'Content-Type: application/json'  -d '{"name":"jsonplaceholder2","url":"https://jsonplaceholder.typicode.com"}'`
+    SERVICE_RESPONSE=`curl -k -X POST http://$KONG_ADMIN_HOST:8001/services/  -H 'Content-Type: application/json'  -d '{"name":"jsonplaceholder2","url":"http://localhost:3000"}'`
 
     SERVICE_ID=`echo $SERVICE_RESPONSE | jq -r ".id"`
     echo "SERVICE_ID " .. $SERVICE_ID
@@ -196,15 +196,6 @@ function config_oidc_and_uma_pep() {
     echo "=================================================="
     echo "config_oidc_and_uma_pep"
     echo "=================================================="
-    if [ "$DISTRIBUTION" == "centos7" ]; then
-        yum install git -y
-    fi
-
-    git clone https://github.com/ldeveloperl1985/node-ejs.git
-    cd node-ejs
-    npm i
-    npm i -g pm2
-    pm2 start app.js
 
     SERVICE_RESPONSE=`curl -k -X POST http://$KONG_ADMIN_HOST:8001/services/  -H 'Content-Type: application/json'  -d '{"name":"oidc-plugin-test","url":"http://localhost:4400"}'`
 
@@ -298,7 +289,7 @@ function test_oauth_auth_and_opa_pep() {
 
     OPA_PORT=`docker inspect --format='{{(index (index .NetworkSettings.Ports "8181/tcp") 0).HostPort}}' $OPA_ID`
 
-    SERVICE_RESPONSE=`curl -k -X POST http://$KONG_ADMIN_HOST:8001/services/  -H 'Content-Type: application/json'  -d '{"name":"OAUTH-AUTH-OPA-Test","url":"https://jsonplaceholder.typicode.com"}'`
+    SERVICE_RESPONSE=`curl -k -X POST http://$KONG_ADMIN_HOST:8001/services/  -H 'Content-Type: application/json'  -d '{"name":"OAUTH-AUTH-OPA-Test","url":"http://localhost:3000"}'`
     SERVICE_ID=`echo $SERVICE_RESPONSE | jq -r ".id"`
     echo "SERVICE_ID " .. $SERVICE_ID
 
@@ -347,6 +338,37 @@ function test_oauth_auth_and_opa_pep() {
     ss -ntlp
 }
 
+function setup_upstream_app() {
+    sleep 1
+
+    echo "=================================================="
+    echo "setup node ejs git"
+    echo "=================================================="
+
+    if [ "$DISTRIBUTION" == "centos7" ]; then
+        yum install git -y
+    fi
+
+    git clone https://github.com/ldeveloperl1985/node-ejs.git
+    cd node-ejs
+    npm i
+    npm i -g pm2
+    pm2 start app.js
+
+    sleep 1
+    echo "=================================================="
+    echo "setup nodeejs git"
+    echo "=================================================="
+
+    git clone https://github.com/ldeveloperl1985/node-api.git
+    cd node-api
+    npm i
+    pm2 start index.js
+
+    sleep 1
+}
+
+setup_upstream_app
 test_oauth_auth_and_pep
 test_uma_auth_and_pep
 config_oidc_and_uma_pep
