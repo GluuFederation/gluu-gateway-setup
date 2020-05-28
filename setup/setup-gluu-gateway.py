@@ -163,10 +163,10 @@ class KongSetup(object):
         self.oxd_archived_log_filename_pattern = "/var/log/oxd-server/oxd-server-%d{yyyy-MM-dd}-%i.log.gz"
 
         # kong package file names
-        self.ubuntu16_kong_file = "kong-2.0.1.xenial.amd64.deb"
-        self.centos7_kong_file = "kong-2.0.1.el7.amd64.rpm"
-        self.rhel7_kong_file = "kong-2.0.1.rhel7.amd64.rpm"
-        self.ubuntu18_kong_file = "kong-2.0.1.bionic.amd64.deb"
+        self.ubuntu16_kong_file = "kong-2.0.4.xenial.amd64.deb"
+        self.centos7_kong_file = "kong-2.0.4.el7.amd64.rpm"
+        self.rhel7_kong_file = "kong-2.0.4.rhel7.amd64.rpm"
+        self.ubuntu18_kong_file = "kong-2.0.4.bionic.amd64.deb"
 
     def init_parameters_from_json_argument(self):
         if len(sys.argv) > 1:
