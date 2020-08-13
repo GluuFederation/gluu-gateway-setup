@@ -130,7 +130,7 @@ class KongSetup(object):
         self.init_parameters_from_json_argument()
 
         # OS types properties
-        self.os_types = ['centos', 'red', 'ubuntu']
+        self.os_types = ['centos', 'red', 'ubuntu', 'debian']
         self.os_type = None
         self.os_version = None
         self.os_initdaemon = None
@@ -163,10 +163,14 @@ class KongSetup(object):
         self.oxd_archived_log_filename_pattern = "/var/log/oxd-server/oxd-server-%d{yyyy-MM-dd}-%i.log.gz"
 
         # kong package file names
-        self.ubuntu16_kong_file = "kong-2.0.4.xenial.amd64.deb"
-        self.centos7_kong_file = "kong-2.0.4.el7.amd64.rpm"
-        self.rhel7_kong_file = "kong-2.0.4.rhel7.amd64.rpm"
-        self.ubuntu18_kong_file = "kong-2.0.4.bionic.amd64.deb"
+        self.ubuntu20_kong_file = "kong-2.1.1.focal.amd64.deb"
+        self.ubuntu18_kong_file = "kong-2.1.1.bionic.amd64.deb"
+        self.centos8_kong_file = "kong-2.1.1.el8.amd64.rpm"
+        self.centos7_kong_file = "kong-2.1.1.el7.amd64.rpm"
+        self.rhel8_kong_file = "kong-2.1.1.rhel8.amd64.rpm"
+        self.rhel7_kong_file = "kong-2.1.1.rhel7.amd64.rpm"
+        self.debian10_kong_file = "kong-2.1.1.buster.amd64.deb"
+        self.debian9_kong_file = "kong-2.1.1.stretch.amd64.deb"
 
     def init_parameters_from_json_argument(self):
         if len(sys.argv) > 1:
@@ -204,6 +208,16 @@ class KongSetup(object):
             os.system('/bin/su -s /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\"" postgres' % self.pg_pwd)
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
+        if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '8':
+            # Initialize PostgreSQL first time
+            self.run([self.cmd_ln, '/usr/lib/systemd/system/postgresql-10.service', '/usr/lib/systemd/system/postgresql.service'])
+            self.run(['/usr/pgsql-10/bin/postgresql-10-setup', 'initdb'])
+            self.render_template_in_out(self.dist_pg_hba_config_file, self.template_folder, self.dist_pg_hba_config_path)
+            self.run([self.cmd_systemctl, 'enable', 'postgresql'])
+            self.run([self.cmd_systemctl, 'start', 'postgresql'])
+            os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
+            os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'kong\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE kong;\\\""')
+            os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
         if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '7':
             # Initialize PostgreSQL first time
             self.run([self.cmd_ln, '/usr/lib/systemd/system/postgresql-10.service', '/usr/lib/systemd/system/postgresql.service'])
@@ -232,7 +246,7 @@ class KongSetup(object):
             else:
                 self.run(["/sbin/chkconfig", serviceName, "on" if action=='enable' else 'off'])
 
-        elif self.os_type+self.os_version in ('ubuntu18','debian9'):
+        elif self.os_type+self.os_version in ('ubuntu20','ubuntu18','debian9','debia10'):
             self.run([self.cmd_systemctl, action, serviceName])
 
         elif self.os_type in [Distribution.Ubuntu, Distribution.Debian]:
@@ -547,16 +561,32 @@ make sure it's available from this server."""
         kong_package_file = ''
         install_kong_cmd = []
 
+        if self.os_type == Distribution.Ubuntu and self.os_version == '20':
+            kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.ubuntu20_kong_file)
+            install_kong_cmd = [self.cmd_dpkg, '--install', kong_package_file]
+
         if self.os_type == Distribution.Ubuntu and self.os_version == '18':
             kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.ubuntu18_kong_file)
             install_kong_cmd = [self.cmd_dpkg, '--install', kong_package_file]
 
-        if self.os_type == Distribution.Ubuntu and self.os_version == '16':
-            kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.ubuntu16_kong_file)
+        if self.os_type == Distribution.Debian and self.os_version == '10':
+            kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.debian10_kong_file)
             install_kong_cmd = [self.cmd_dpkg, '--install', kong_package_file]
+
+        if self.os_type == Distribution.Debian and self.os_version == '9':
+            kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.debian9_kong_file)
+            install_kong_cmd = [self.cmd_dpkg, '--install', kong_package_file]
+
+        if self.os_type == Distribution.CENTOS and self.os_version == '8':
+            kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.centos8_kong_file)
+            install_kong_cmd = [self.cmd_rpm, '--install', '--verbose', '--hash', kong_package_file]
 
         if self.os_type == Distribution.CENTOS and self.os_version == '7':
             kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.centos7_kong_file)
+            install_kong_cmd = [self.cmd_rpm, '--install', '--verbose', '--hash', kong_package_file]
+
+        if self.os_type == Distribution.RHEL and self.os_version == '8':
+            kong_package_file = "%s/%s" % (self.gg_dist_app_folder, self.rhel8_kong_file)
             install_kong_cmd = [self.cmd_rpm, '--install', '--verbose', '--hash', kong_package_file]
 
         if self.os_type == Distribution.RHEL and self.os_version == '7':
@@ -569,10 +599,13 @@ make sure it's available from this server."""
 
         self.run(install_kong_cmd)
 
-        if self.os_type == Distribution.Ubuntu and self.os_version in ['16', '18']:
+        if self.os_type == Distribution.Ubuntu and self.os_version in ['18', '20']:
             self.kong_lua_ssl_trusted_certificate = "/etc/ssl/certs/ca-certificates.crt"
 
-        if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '7':
+        if self.os_type == Distribution.Debian:
+            self.kong_lua_ssl_trusted_certificate = "/etc/ssl/certs/ca-certificates.crt"
+
+        if self.os_type in [Distribution.CENTOS, Distribution.RHEL]:
             self.kong_lua_ssl_trusted_certificate = "/etc/ssl/certs/ca-bundle.crt"
 
         self.render_template_in_out(self.dist_kong_config_file, self.template_folder, self.dist_kong_config_folder)
@@ -609,15 +642,11 @@ make sure it's available from this server."""
 
     def start_gg_service(self):
         self.log_it("Starting %s..." % self.gg_service)
-        if self.os_type == Distribution.Ubuntu and self.os_version in ['16']:
-            self.run([self.cmd_service, self.gg_service, 'stop'])
-            self.run([self.cmd_service, self.gg_service, 'start'])
-            self.run([self.cmd_update_rs_d, self.gg_service, 'defaults'])
-        elif self.os_type == Distribution.Ubuntu and self.os_version in ['18']:
+        if self.os_type == Distribution.Ubuntu and self.os_version in ['18','20']:
             self.run([self.cmd_systemctl, 'stop', self.gg_service])
             self.run([self.cmd_systemctl, 'start', self.gg_service])
             self.run([self.cmd_systemctl, 'enable', self.gg_service])
-        elif self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '7':
+        elif self.os_type in [Distribution.CENTOS, Distribution.RHEL, Distribution.Debian]:
             self.run([self.cmd_systemctl, 'stop', self.gg_service])
             self.run([self.cmd_systemctl, 'start', self.gg_service])
             self.run([self.cmd_systemctl, 'enable', self.gg_service])
@@ -631,7 +660,7 @@ make sure it's available from this server."""
             self.log_it(traceback.format_exc(), True)
 
     def disable_warnings(self):
-        if self.os_type in [Distribution.Ubuntu, Distribution.CENTOS, Distribution.RHEL] and self.os_version in ['18', '16', '7', '6']:
+        if self.os_type in [Distribution.Ubuntu, Distribution.CENTOS, Distribution.RHEL, Distribution.Debian]:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def choose_from_list(self, list_of_choices, choice_name="item", default_choice_index=0):
