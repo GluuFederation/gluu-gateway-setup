@@ -17,5 +17,9 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
  npm,
  ca-certificates,
  logrotate,
+ openssl,
+ libpcre3,
+ procps,
+ perl
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>
