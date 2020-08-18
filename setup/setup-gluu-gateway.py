@@ -16,6 +16,7 @@ import urllib3
 import platform
 import pwd
 import glob
+import distro
 
 class Distribution:
     Ubuntu = "ubuntu"
@@ -197,7 +198,7 @@ class KongSetup(object):
 
     def configure_postgres(self):
         self.log_it('Configuring postgres...')
-        print 'Configuring postgres...'
+        print ('Configuring postgres...')
         if self.os_type == Distribution.Ubuntu:
             self.run(['/etc/init.d/postgresql', 'start'])
             os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
@@ -327,7 +328,7 @@ class KongSetup(object):
         self.run([self.cmd_chown, '%s:%s' % (user, user), key])
         self.run([self.cmd_chmod, '700', key])
 
-    def get_pw(self, size=12, chars=string.ascii_uppercase + string.digits + string.lowercase):
+    def get_pw(self, size=12, chars=string.ascii_uppercase + string.digits + string.ascii_lowercase):
         return ''.join(random.choice(chars) for _ in range(size))
 
     def gen_kong_ssl_certificate(self):
@@ -341,8 +342,8 @@ class KongSetup(object):
         try:
             test_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             detected_ip = [(test_socket.connect(('8.8.8.8', 80)),
-                           test_socket.getsockname()[0],
-                           test_socket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
+                            test_socket.getsockname()[0],
+                            test_socket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
         except:
             self.log_it("No detected IP address", True)
             self.log_it(traceback.format_exc(), True)
@@ -352,23 +353,23 @@ class KongSetup(object):
             test_ip = self.get_prompt("Enter IP Address")
         if not self.is_ip(test_ip):
             test_ip = None
-            print 'ERROR: The IP Address is invalid. Try again\n'
+            print ('ERROR: The IP Address is invalid. Try again\n')
         return test_ip
 
     def get_prompt(self, prompt, default_value=None):
         try:
             if default_value:
-                user_input = raw_input("%s [%s] : " % (prompt, default_value)).strip()
+                user_input = input("%s [%s] : " % (prompt, default_value)).strip()
                 if user_input == '':
                     return default_value
                 else:
                     return user_input
             else:
-                input = False
-                while not input:
-                    user_input = raw_input("%s : " % prompt).strip()
+                _input = False
+                while not _input:
+                    user_input = input("%s : " % prompt).strip()
                     if user_input != '':
-                        input = True
+                        _input = True
                         return user_input
         except KeyboardInterrupt:
             sys.exit()
@@ -439,7 +440,7 @@ class KongSetup(object):
 
     def config_gluu_gateway_ui(self):
         self.log_it('Installing gluu_gateway_ui node packages...')
-        print 'Installing gluu_gateway_ui node packages...'
+        print ('Installing gluu_gateway_ui node packages...')
 
         if not os.path.exists(self.cmd_node):
             self.run([self.cmd_ln, '-s', '`which nodejs`', self.cmd_node])
@@ -463,7 +464,7 @@ class KongSetup(object):
         if self.generate_client:
             msg = 'Creating OXD OP client for Gluu Gateway GUI used to call oxd-server endpoints...'
             self.log_it(msg)
-            print msg
+            print (msg)
             oxd_registration_endpoint = self.gluu_gateway_ui_oxd_web + '/register-site'
             redirect_uri = 'https://' + self.gluu_gateway_ui_redirect_uri + ':' + self.gluu_gateway_ui_port
             payload = {
@@ -505,6 +506,7 @@ class KongSetup(object):
         f.close()
 
     def make_boolean(self, c):
+        print (c)
         if c in ['t', 'T', 'y', 'Y']:
             return True
         if c in ['f', 'F', 'n', 'N']:
@@ -523,7 +525,7 @@ class KongSetup(object):
         # Certificate configuration
         self.ip = self.get_ip()
         self.host_name = self.get_prompt('Enter Hostname', self.detect_host_name())
-        print 'The next few questions are used to generate the Kong self-signed HTTPS certificate'
+        print ('The next few questions are used to generate the Kong self-signed HTTPS certificate')
         self.country_code = self.get_prompt('Enter two letter Country Code')
         self.state = self.get_prompt('Enter two letter State Code')
         self.city = self.get_prompt('Enter your city or locality')
@@ -534,7 +536,7 @@ class KongSetup(object):
         msg = """
 If you already have a postgres user and database in the
 Postgres DB, then enter existing password, otherwise enter new password: """
-        print msg
+        print (msg)
         pg = self.get_pw()
         self.pg_pwd = getpass.getpass(prompt='Password [%s] : ' % pg) or pg
 
@@ -546,7 +548,7 @@ Postgres DB, then enter existing password, otherwise enter new password: """
 The next few questions are used to configure GG UI(Konga).
 You are connecting to an existing oxd server from other the network,
 make sure it's available from this server."""
-        print msg
+        print (msg)
 
         self.gluu_gateway_ui_oxd_web = self.get_prompt('Enter OXD server URL')
         self.generate_client = self.make_boolean(self.get_prompt("Generate client credentials to call oxd-server API's? (y - generate, n - enter existing client credentials manually)", 'y'))
@@ -667,11 +669,11 @@ make sure it's available from this server."""
         return_value = None
         choice_map = {}
         chosen_index = 0
-        print "\nSelect the number for the %s from the following list:" % choice_name
+        print ("\nSelect the number for the %s from the following list:" % choice_name)
         for choice in list_of_choices:
             choice_map[chosen_index] = choice
             chosen_index += 1
-            print "  [%i]   %s" % (chosen_index, choice)
+            print ("  [%i]   %s" % (chosen_index, choice))
         while not return_value:
             choice_number = self.get_prompt("Please select a number listed above", str(default_choice_index + 1))
             try:
@@ -679,15 +681,15 @@ make sure it's available from this server."""
                 if (choice_number >= 0) & (choice_number < len(list_of_choices)):
                     return_value = choice_map[choice_number]
                 else:
-                    print '"%i" is not a valid choice' % (choice_number + 1)
+                    print ('"%i" is not a valid choice' % (choice_number + 1))
             except:
-                print 'Cannot convert "%s" to a number' % choice_number
+                print ('Cannot convert "%s" to a number' % choice_number)
                 self.log_it(traceback.format_exc(), True)
         return return_value
 
     def detect_os_type(self):
         try:
-            p = platform.linux_distribution()
+            p = distro.linux_distribution()
             self.os_type = p[0].split()[0].lower()
             self.os_version = p[1].split('.')[0]
         except:
@@ -769,7 +771,7 @@ make sure it's available from this server."""
             self.exit(message)
 
     def exit(self, message):
-        print message
+        print (message)
         self.log_it(message, True)
         sys.exit()
 
@@ -780,10 +782,10 @@ make sure it's available from this server."""
     def check_root(self):
         try:
             user = pwd.getpwuid(os.getuid()).pw_name
-            print user
+            print (user)
             if user != "root":
                 msg="Your user is not root user, Run setup script in root user."
-                print msg
+                print (msg)
                 self.log_it(msg, True)
                 sys.exit()
         except Exception as err:
@@ -795,13 +797,13 @@ if __name__ == "__main__":
     try:
         if kongSetup.is_prompt:
             kongSetup.license = kongSetup.make_boolean(kongSetup.get_prompt('Do you acknowledge that use of the Gluu Gateway is under the Apache 2.0 License? (y|N)', 'N'))
-            print ""
+            print ("")
         if kongSetup.license:
             kongSetup.make_folders()
             if kongSetup.is_prompt:
                 kongSetup.prompt_for_properties()
-            print "\n"
-            print "-----------------------".ljust(30) + "-----------------------".rjust(35) + "\n"
+            print ("\n")
+            print ("-----------------------".ljust(30) + "-----------------------".rjust(35) + "\n")
             cnf = 'Host'.ljust(30) + kongSetup.host_name.rjust(35) + "\n" \
                   + 'Organization'.ljust(30) + kongSetup.org_name.rjust(35) + "\n" \
                   + 'City'.ljust(30) + kongSetup.city.rjust(35) + "\n" \
@@ -817,7 +819,7 @@ if __name__ == "__main__":
             else:
                 cnf += 'Generate Client Credentials?'.ljust(30) + repr(kongSetup.generate_client).rjust(35) + "\n"
 
-            print cnf
+            print (cnf)
             kongSetup.log_it(cnf)
 
             if kongSetup.is_prompt:
@@ -838,12 +840,12 @@ if __name__ == "__main__":
                 kongSetup.migrate_kong()
                 kongSetup.config_gluu_gateway_ui()
                 kongSetup.start_gg_service()
-                print "\n\nGluu Gateway configuration is successful!!! https://localhost:%s\n\n" % kongSetup.gluu_gateway_ui_port
+                print ("\n\nGluu Gateway configuration is successful!!! https://localhost:%s\n\n" % kongSetup.gluu_gateway_ui_port)
             else:
-                print "Exit"
+                print ("Exit")
         else:
-            print "Exit"
+            print ("Exit")
     except:
         kongSetup.log_it("***** Error caught in main loop *****", True)
         kongSetup.log_it(traceback.format_exc(), True)
-        print "Installation failed. See: \n  %s \n  %s \nfor more details." % (kongSetup.log, kongSetup.log_error)
+        print ("Installation failed. See: \n  %s \n  %s \nfor more details." % (kongSetup.log, kongSetup.log_error))
