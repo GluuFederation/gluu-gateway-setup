@@ -16,7 +16,11 @@ import urllib3
 import platform
 import pwd
 import glob
-import distro
+try:
+    import distro
+except:
+    print ('Unable to find `distro` package hence using `platform`')
+    distro = platform
 
 class Distribution:
     Ubuntu = "ubuntu"
