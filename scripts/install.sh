@@ -6,6 +6,7 @@ HOST=$3
 HOST_IP=$4
 OXD_HOST=$5
 
+# Ubuntu 18 - Bionic
 function prepareSourcesBionic {
     sleep 120
     apt-get update
@@ -19,25 +20,29 @@ function prepareSourcesBionic {
     sleep 500
 }
 
-function prepareSourcesXenial {
+# Ubuntu 20 - Focal
+function prepareSourcesFocal {
     sleep 120
     apt-get update
-    echo "deb https://repo.gluu.org/ubuntu/ xenial-devel main" > /etc/apt/sources.list.d/gluu-repo.list
+    
+    echo "deb https://repo.gluu.org/ubuntu/ focal-devel main" > /etc/apt/sources.list.d/gluu-repo.list
     curl https://repo.gluu.org/ubuntu/gluu-apt.key | apt-key add -
-    echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" > /etc/apt/sources.list.d/psql.list
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main" > /etc/apt/sources.list.d/psql.list
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
     curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+    
     pkill .*upgrade.*
-    rm /var/lib/dpkg/lock
-    sleep 120
+    rm /var/lib/dpkg/lock-frontend
+    sleep 500
 }
 
+# CentOS 7
 function prepareSourcesCentos7 {
     dd if=/dev/zero of=/myswap count=4096 bs=1MiB
     chmod 600 /myswap
     mkswap /myswap
     swapon /myswap
-    yum -y install wget curl lsof xvfb
+    yum -y install wget curl lsof xvfb nano
     wget https://repo.gluu.org/centos/Gluu-centos-7-testing.repo -O /etc/yum.repos.d/Gluu.repo
     wget https://repo.gluu.org/centos/RPM-GPG-KEY-GLUU -O /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU
     rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU
@@ -45,11 +50,57 @@ function prepareSourcesCentos7 {
     curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
 }
 
+# CentOS 8
+function prepareSourcesCentos8 {
+    dd if=/dev/zero of=/myswap count=4096 bs=1MiB
+    chmod 600 /myswap
+    mkswap /myswap
+    swapon /myswap
+    yum -y install wget curl lsof xvfb nano
+
+    wget https://repo.gluu.org/centos/Gluu-centos-8-testing.repo -O /etc/yum.repos.d/Gluu.repo
+    wget https://repo.gluu.org/centos/RPM-GPG-KEY-GLUU -O /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU
+    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU
+    rpm -Uvh https://yum.postgresql.org/10/redhat/rhel-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
+}
+
+#Debian 9
+function prepareSourcesDebian9 {
+    sleep 120
+    apt-get update
+
+    echo "deb https://repo.gluu.org/debian/ stretch-testing main" > /etc/apt/sources.list.d/gluu-repo.list
+    curl https://repo.gluu.org/ubuntu/gluu-apt.key | apt-key add -
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" > /etc/apt/sources.list.d/psql.list
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+    curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -  
+
+    sleep 500
+}
+
+#Debian 10
+function prepareSourcesDebian10 {
+    sleep 120
+    apt-get update
+
+    echo "deb https://repo.gluu.org/debian/ buster-testing main" > /etc/apt/sources.list.d/gluu-repo.list
+    curl https://repo.gluu.org/ubuntu/gluu-apt.key | apt-key add -
+
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" > /etc/apt/sources.list.d/psql.list
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+    curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+
+    sleep 500
+}
+
 function prepareSourcesForDistribution {
     case $DISTRIBUTION in
         "bionic") prepareSourcesBionic ;;
-        "xenial") prepareSourcesXenial ;;
+        "focal") prepareSourcesFocal ;;
         "centos7") prepareSourcesCentos7 ;;
+        "centos8") prepareSourcesCentos8 ;;
     esac
 }
 
