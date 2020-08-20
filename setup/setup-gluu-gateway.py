@@ -215,9 +215,9 @@ class KongSetup(object):
             os.system('sudo -iu postgres /bin/bash -c "psql -U postgres -tc \\\"SELECT 1 FROM pg_database WHERE datname = \'konga\'\\\" | grep -q 1 || psql -U postgres -c \\\"CREATE DATABASE konga;\\\""')
         if self.os_type in [Distribution.CENTOS, Distribution.RHEL] and self.os_version == '8':
             # Initialize PostgreSQL first time
+            self.run([self.cmd_ln, '/usr/lib/systemd/system/postgresql-10.service', '/usr/lib/systemd/system/postgresql.service'])
             self.run(['/usr/bin/postgresql-setup', 'initdb'])
             self.render_template_in_out('/var/lib/pgsql/data/pg_hba.conf', self.template_folder, '/var/lib/pgsql/data')
-            self.render_template_in_out(self.dist_pg_hba_config_file, self.template_folder, self.dist_pg_hba_config_path)
             self.run([self.cmd_systemctl, 'enable', 'postgresql'])
             self.run([self.cmd_systemctl, 'start', 'postgresql'])
             os.system('sudo -iu postgres /bin/bash -c "psql -c \\\"ALTER USER postgres WITH PASSWORD \'%s\';\\\""' % self.pg_pwd)
