@@ -129,7 +129,7 @@ function configureGG {
  sed -i "78s/ggUIRedirectURLHost: process.env.GG_UI_REDIRECT_URL_HOST || 'localhost'/ggUIRedirectURLHost: 'dev1.gluu.org'/" /opt/gluu-gateway-setup/templates/local.js
 
  cd /opt/gluu-gateway-setup
- python setup-gluu-gateway.py '{"gluu_gateway_ui_redirect_uri":"'$HOST'","gluu_gateway_ui_oxd_web":"https://'$OXD_HOST':8443","license":true,"ip":"'$HOST_IP'","host_name":"'$HOST'","country_code":"US","state":"US","city":"NY","org_name":"Test","admin_email":"test@test.com","pg_pwd":"admin","install_oxd":true,"gluu_gateway_ui_op_host":"'$OP_HOST'","generate_client":true}'
+ python3 setup-gluu-gateway.py '{"gluu_gateway_ui_redirect_uri":"'$HOST'","gluu_gateway_ui_oxd_web":"https://'$OXD_HOST':8443","license":true,"ip":"'$HOST_IP'","host_name":"'$HOST'","country_code":"US","state":"US","city":"NY","org_name":"Test","admin_email":"test@test.com","pg_pwd":"admin","install_oxd":true,"gluu_gateway_ui_op_host":"'$OP_HOST'","generate_client":true}'
 }
 
 function createSwap {
