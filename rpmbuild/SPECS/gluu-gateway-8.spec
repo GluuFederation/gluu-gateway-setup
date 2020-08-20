@@ -8,7 +8,7 @@ Source0:	gluu-gateway-4.2.1.tar.gz
 Source1:	gluu-gateway.service
 Source3:	konga.service
 BuildArch:      noarch
-Requires:	postgresql >= 10.6, postgresql-server >= 10.6, nodejs, lua-json, unzip, python3-requests, ca-certificates, logrotate
+Requires:	postgresql >= 10.6, postgresql-server >= 10.6, nodejs, lua-json, unzip, python3-requests, ca-certificates, logrotate, perl, zlib-devel
 
 %description
 The Gluu Gateway is a package which can be used to quickly
