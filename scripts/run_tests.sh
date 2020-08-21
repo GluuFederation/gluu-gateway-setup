@@ -341,7 +341,7 @@ function setup_upstream_app() {
     echo "setup node ejs git"
     echo "=================================================="
 
-    if [ "$DISTRIBUTION" == "centos7" ]; then
+    if [ "$DISTRIBUTION" == "centos7" -o "$DISTRIBUTION" == "centos8" ]; then
         yum install git -y
     fi
 
