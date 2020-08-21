@@ -257,9 +257,16 @@ function test_oauth_auth_and_opa_pep() {
     ###################################
     #### Configure OPA PEP
     ###################################
-    function docker_deb {
+    function docker_ubuntu {
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add
         add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        apt-get -qqy update
+        apt-get -qqy install docker-ce
+    }
+    
+    function docker_deb {
+        curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
         apt-get -qqy update
         apt-get -qqy install docker-ce
     }
@@ -280,8 +287,8 @@ function test_oauth_auth_and_opa_pep() {
     }
 
     case $DISTRIBUTION in
-        "bionic") docker_deb ;;
-        "focal") docker_deb ;;
+        "bionic") docker_ubuntu ;;
+        "focal") docker_ubuntu ;;
         "centos7") docker_rpm7 ;;
         "centos8") docker_rpm8 ;;
         "debian9") docker_deb ;;
