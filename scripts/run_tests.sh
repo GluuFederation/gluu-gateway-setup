@@ -264,18 +264,26 @@ function test_oauth_auth_and_opa_pep() {
         apt-get -qqy install docker-ce
     }
 
-    function docker_rpm {
+    function docker_rpm7 {
         yum install -y yum-utils device-mapper-persistent-data lvm2
         yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
         yum install -y docker-ce docker-ce-cli containerd.io
         systemctl start docker
     }
 
+    function docker_rpm8 {
+        yum install -y yum-utils device-mapper-persistent-data lvm2
+        yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+        yum install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm
+        yum install -y docker-ce docker-ce-cli
+        systemctl start docker
+    }
+
     case $DISTRIBUTION in
         "bionic") docker_deb ;;
         "focal") docker_deb ;;
-        "centos7") docker_rpm ;;
-        "centos8") docker_rpm ;;
+        "centos7") docker_rpm7 ;;
+        "centos8") docker_rpm8 ;;
         "debian9") docker_deb ;;
         "debian10") docker_deb ;;
     esac
