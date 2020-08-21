@@ -63,6 +63,7 @@ function prepareSourcesCentos8 {
     wget https://repo.gluu.org/centos/RPM-GPG-KEY-GLUU -O /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU
     rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU
     rpm -Uvh https://yum.postgresql.org/10/redhat/rhel-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
     curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
 }
 
