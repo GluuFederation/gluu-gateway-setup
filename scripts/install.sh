@@ -101,6 +101,8 @@ function prepareSourcesForDistribution {
         "focal") prepareSourcesFocal ;;
         "centos7") prepareSourcesCentos7 ;;
         "centos8") prepareSourcesCentos8 ;;
+        "debian9") prepareSourcesDebian9 ;;
+        "debian10") prepareSourcesDebian10 ;;
     esac
 }
 
@@ -118,8 +120,11 @@ function installGGRpm {
 function installGG {
     case $DISTRIBUTION in
         "bionic") installGGDeb ;;
-        "xenial") installGGDeb ;;
+        "focal") installGGDeb ;;
         "centos7") installGGRpm ;;
+        "centos8") installGGRpm ;;
+        "debian9") installGGDeb ;;
+        "debian10") installGGDeb ;;
     esac
 }
 
@@ -153,9 +158,9 @@ function displayLogs {
     echo ""
     cat /opt/gluu-gateway-setup/gluu-gateway-setup.log
     echo ""
-    echo "----------------------netstat -tulpn----------------------------------"
+    echo "----------------------ss -tulpn----------------------------------"
     echo ""
-    netstat -tulpn
+    ss -tulpn
     echo ""
     echo "----------------------services----------------------------------"
     echo ""

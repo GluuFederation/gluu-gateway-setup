@@ -257,21 +257,14 @@ function test_oauth_auth_and_opa_pep() {
     ###################################
     #### Configure OPA PEP
     ###################################
-    function docker_bionic {
+    function docker_deb {
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add
         add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
         apt-get -qqy update
         apt-get -qqy install docker-ce
     }
 
-    function docker_xenial {
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add
-        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-        apt-get -qqy update
-        apt-get -qqy install docker-ce
-    }
-
-    function docker_centos7 {
+    function docker_rpm {
         yum install -y yum-utils device-mapper-persistent-data lvm2
         yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
         yum install -y docker-ce docker-ce-cli containerd.io
@@ -279,9 +272,12 @@ function test_oauth_auth_and_opa_pep() {
     }
 
     case $DISTRIBUTION in
-         "bionic") docker_bionic ;;
-         "xenial") docker_xenial ;;
-         "centos7") docker_centos7 ;;
+        "bionic") docker_deb ;;
+        "focal") docker_deb ;;
+        "centos7") docker_rpm ;;
+        "centos8") docker_rpm ;;
+        "debian9") docker_deb ;;
+        "debian10") docker_deb ;;
     esac
 
     OPA_ID=`docker run -p 8181 -d --name opa openpolicyagent/opa:0.10.5 run --server`
