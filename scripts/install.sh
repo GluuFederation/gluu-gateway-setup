@@ -71,7 +71,7 @@ function prepareSourcesCentos8 {
 function prepareSourcesDebian9 {
     sleep 120
     apt-get update
-
+    apt-get install curl
     echo "deb https://repo.gluu.org/debian/ stretch-testing main" > /etc/apt/sources.list.d/gluu-repo.list
     curl https://repo.gluu.org/ubuntu/gluu-apt.key | apt-key add -
     echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" > /etc/apt/sources.list.d/psql.list
@@ -85,7 +85,7 @@ function prepareSourcesDebian9 {
 function prepareSourcesDebian10 {
     sleep 120
     apt-get update
-
+    apt-get install curl
     echo "deb https://repo.gluu.org/debian/ buster-testing main" > /etc/apt/sources.list.d/gluu-repo.list
     curl https://repo.gluu.org/ubuntu/gluu-apt.key | apt-key add -
 
