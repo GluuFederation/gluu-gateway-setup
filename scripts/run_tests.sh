@@ -359,6 +359,7 @@ function setup_upstream_app() {
     if [ "$DISTRIBUTION" == "centos7" -o "$DISTRIBUTION" == "centos8" ]; then
         yum install git -y
     elif [ "$DISTRIBUTION" == "debian9" -o "$DISTRIBUTION" == "debian10" ]; then
+        apt install software-properties-common -y
         apt-get install git -y
     fi
 
