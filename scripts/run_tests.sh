@@ -358,6 +358,8 @@ function setup_upstream_app() {
 
     if [ "$DISTRIBUTION" == "centos7" -o "$DISTRIBUTION" == "centos8" ]; then
         yum install git -y
+    elif [ "$DISTRIBUTION" == "debian9" -o "$DISTRIBUTION" == "debian10" ]; then
+        apt-get install git -y
     fi
 
     git clone https://github.com/ldeveloperl1985/node-ejs.git
