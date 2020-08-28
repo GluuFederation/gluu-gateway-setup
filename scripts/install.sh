@@ -85,7 +85,7 @@ function prepareSourcesDebian9 {
 function prepareSourcesDebian10 {
     sleep 120
     apt-get update
-    apt-get install -y curl apt-transport-https
+    apt-get install -y gnupg2 curl
     echo "deb https://repo.gluu.org/debian/ buster-testing main" > /etc/apt/sources.list.d/gluu-repo.list
     curl https://repo.gluu.org/ubuntu/gluu-apt.key | apt-key add -
 
