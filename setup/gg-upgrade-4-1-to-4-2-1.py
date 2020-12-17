@@ -165,9 +165,9 @@ class KongSetup(object):
         self.prometheus_file_path = '%s/third-party/nginx-lua-prometheus/prometheus.lua' % self.dist_gluu_gateway_folder
 
         # kong package file names
-        self.ubuntu18_kong_file = "kong-2.1.1.bionic.amd64.deb"
-        self.centos7_kong_file = "kong-2.1.1.el7.amd64.rpm"
-        self.rhel7_kong_file = "kong-2.1.1.rhel7.amd64.rpm"
+        self.ubuntu18_kong_file = "kong-2.2.1.bionic.amd64.deb"
+        self.centos7_kong_file = "kong-2.2.1.el7.amd64.rpm"
+        self.rhel7_kong_file = "kong-2.2.1.rhel7.amd64.rpm"
 
         # db names
         self.dist_konga_db_file = "%s/templates/konga.sql" % self.dist_gluu_gateway_setup_folder
