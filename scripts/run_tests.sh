@@ -181,7 +181,8 @@ function test_uma_auth_and_pep() {
     curl -X GET http://$KONG_PROXY_HOST:8000/posts/1 -H "Authorization: Bearer $TOKEN"  -H 'Host: jsonplaceholder2.typicode.com'
 
     CHECK_STATUS=`curl -H "Authorization: Bearer $TOKEN"  -H 'Host: jsonplaceholder2.typicode.com' --write-out "%{http_code}\n" --silent --output /dev/null http://$KONG_PROXY_HOST:8000/posts/1`
-
+    echo "CHECK_STATUS " .. $CHECK_STATUS
+    
     if [ "$CHECK_STATUS" != "200" ]; then
         echo "UMA PEP security fail"
         exit 1
